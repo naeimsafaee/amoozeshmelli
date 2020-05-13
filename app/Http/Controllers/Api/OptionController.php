@@ -111,7 +111,10 @@ class OptionController extends Controller{
             $question->subject;
             $question->image;
 
+            $question["image_url"] = $question["image"]["url"];
+
             unset($question["image_id"]);
+            unset($question["image"]);
             unset($question["quiz_id"]);
             unset($question["lesson_id"]);
             unset($question["subject_id"]);
