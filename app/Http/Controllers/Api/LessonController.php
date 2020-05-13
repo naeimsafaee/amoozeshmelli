@@ -144,6 +144,8 @@ class LessonController extends Controller{
 
         $lesson = Lesson::find($id);
 
+        if($lesson == null)
+            return response()->json(["error" => ["message" => "lesson not found!"]],404);
         return response()->json(["data" => $lesson],200);
     }
 
