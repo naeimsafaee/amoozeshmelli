@@ -93,7 +93,7 @@ class OptionController extends Controller{
         $options = Options::where("question_id", $id)->get();
 
         $main_option = [];
-        $question = [];
+        $question = null;
         foreach($options as $option){
             $option->image;
             $option->question;
@@ -103,6 +103,18 @@ class OptionController extends Controller{
             unset($option["question_id"]);
             unset($option["question"]);
             $main_option[] = $option;
+        }
+
+        if($question != null){
+            $question->quiz;
+            $question->lesson;
+            $question->subject;
+            $question->image;
+
+            unset($question["image_id"]);
+            unset($question["quiz_id"]);
+            unset($question["lesson_id"]);
+            unset($question["subject_id"]);
         }
 
         return response()->json([
