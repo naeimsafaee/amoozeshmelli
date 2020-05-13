@@ -70,7 +70,7 @@ class AdvertiseController extends Controller{
             "price" => $request->price,
         ]);
 
-        return response()->json(["success" => ["message" => "people created successfully"]], 200);
+        return response()->json(["success" => ["message" => "advertise created successfully"]], 200);
     }
 
     /**
