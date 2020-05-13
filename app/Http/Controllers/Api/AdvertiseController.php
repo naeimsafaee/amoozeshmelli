@@ -6,6 +6,7 @@ use App\Advertise;
 use App\Http\Controllers\Controller;
 use App\Video;
 use Illuminate\Http\Request;
+use Validator;
 
 class AdvertiseController extends Controller{
     /**

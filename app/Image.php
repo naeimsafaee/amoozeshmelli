@@ -11,7 +11,7 @@ class Image extends Model{
     protected $appends = ['url'];
 
     public function getUrlAttribute(){
-        return $this->path . $this->name;
+        return $this->path . "/" . $this->name;
     }
 
 }
