@@ -132,7 +132,7 @@ class LessonController extends Controller{
             ]);
         }
 
-        return response()->json(["success" => ["message" => "lesson has been added!"]], 200);
+        return response()->json(["success" => ["message" => "lessons have been added!"]], 200);
     }
 
     /**

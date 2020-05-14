@@ -14,6 +14,8 @@ class Section extends Model{
         'teacher_id',
         'subject_id',
         'quiz_id',
+        'award',
+        'helper_award',
         'pre_section_id',
         'opening_date',
         'can_pass',
