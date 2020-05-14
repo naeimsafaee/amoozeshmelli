@@ -123,7 +123,7 @@ class LessonController extends Controller{
             "title" => $request->lesson_title,
         ]);
 
-        $grades = $request->grades;
+        $grades = $request->grade_ids;
 
         foreach($grades as $grade){
             GradeToLesson::updateOrCreate([
