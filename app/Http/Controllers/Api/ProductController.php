@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Image;
 use App\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class ProductController extends Controller{
@@ -75,12 +76,14 @@ class ProductController extends Controller{
             $ext = $image->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('images/product/');
-            $image->move($path, $file_name);
+            //            $path = public_path('images/product/');
+            //            $image->move($path, $file_name);
             $image_id = Image::create([
                 "name" => $file_name,
-                "path" => url('/images/product/'),
+                "path" => "http://easyno.ir",
             ])->id;
+
+            Storage::disk('ftp')->put($file_name, fopen($image, 'r+'));
         }
 
         Product::create([

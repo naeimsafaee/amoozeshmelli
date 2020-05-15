@@ -29,8 +29,6 @@ Route::get('passport', function(){
     Artisan::call('passport:install');
     die('passport installed');
 });
-
-
 //Route::apiResource('users', 'Api\UserController');
 
 
@@ -46,7 +44,6 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
     Route::post('subjects_of_lesson_of_user', 'Api\LessonController@subjects_of_lesson')->middleware('check_user_lesson');
     //    Route::post('user_lessons', 'Api\LessonController@user_lessons');
 
-    Route::get('u_products/{grade_id}', 'Api\ProductController@show_with_grade_id');
     Route::get('u_products', 'Api\ProductController@show_products');
 });
 
