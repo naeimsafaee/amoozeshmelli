@@ -36,6 +36,7 @@ class ProductController extends Controller{
             "gift_price.required" => "title is required!",
             "grade_id.required" => "title is required!",
             "download_able.required" => "title is required!",
+            "file.file" => "file not supported!",
         ]);
 
         if($validator->fails()){
@@ -45,6 +46,12 @@ class ProductController extends Controller{
                 'message' => $validator->errors(),
 
             ], 401);
+        }
+
+        if($request->download_able == 1){
+            if(!isset($request->file)){
+                return response()->json(["error" => ["when you set download able to true file is needed!"]], 401);
+            }
         }
 
         $answer_file_path = null;
