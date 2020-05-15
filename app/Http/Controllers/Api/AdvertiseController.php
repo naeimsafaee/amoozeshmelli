@@ -6,6 +6,7 @@ use App\Advertise;
 use App\Http\Controllers\Controller;
 use App\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class AdvertiseController extends Controller{
@@ -54,11 +55,11 @@ class AdvertiseController extends Controller{
             $ext = $video->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('video/');
-            $video->move($path, $file_name);
+            Storage::disk('ftp')->put("advertises/videos/" . $file_name, fopen($video, 'r+'));
+
             $video_id = Video::create([
                 "name" => $file_name,
-                "path" => $path,
+                "path" => "http://easyno.ir/advertises/videos",
             ])->id;
         }
 

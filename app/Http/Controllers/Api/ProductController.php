@@ -64,10 +64,9 @@ class ProductController extends Controller{
         if($file != null){
             $ext = $file->extension();
             $file_name = time() . mt_rand() . "." . $ext;
+            $file_path = "http://easyno.ir/products/files/" . $file_name;
 
-            $path = public_path('file/product/');
-            $file->move($path, $file_name);
-            $file_path = url('/file/product/') . "/" . $file_name;
+            Storage::disk('ftp')->put("products/files/" . $file_name, fopen($file, 'r+'));
         }
 
         $image = $request->file('image');
@@ -76,14 +75,12 @@ class ProductController extends Controller{
             $ext = $image->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            //            $path = public_path('images/product/');
-            //            $image->move($path, $file_name);
             $image_id = Image::create([
                 "name" => $file_name,
-                "path" => "http://easyno.ir",
+                "path" => "http://easyno.ir/products/images",
             ])->id;
 
-            Storage::disk('ftp')->put("image/product/" . $file_name, fopen($image, 'r+'));
+            Storage::disk('ftp')->put("products/images/" . $file_name, fopen($image, 'r+'));
         }
 
         Product::create([

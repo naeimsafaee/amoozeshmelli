@@ -9,6 +9,7 @@ use App\Part;
 use App\Rules\persian_date;
 use App\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class PartController extends Controller{
@@ -70,11 +71,11 @@ class PartController extends Controller{
             $ext = $video->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('video/');
-            $video->move($path, $file_name);
+            Storage::disk('ftp')->put("parts/videos/" . $file_name, fopen($video, 'r+'));
+
             $video_id = Video::create([
                 "name" => $file_name,
-                "path" => $path,
+                "path" => "http://easyno.ir/parts/videos",
             ])->id;
         }
 
@@ -165,11 +166,11 @@ class PartController extends Controller{
             $ext = $video->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('video/');
-            $video->move($path, $file_name);
+            Storage::disk('ftp')->put("parts/videos/" . $file_name, fopen($video, 'r+'));
+
             $video_id = Video::create([
                 "name" => $file_name,
-                "path" => $path,
+                "path" => "http://easyno.ir/parts/videos/",
             ])->id;
         }
 

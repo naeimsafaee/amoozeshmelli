@@ -7,6 +7,7 @@ use App\Quiz;
 use App\Rules\persian_date;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 
@@ -91,9 +92,9 @@ class QuizController extends Controller{
             $ext = $file->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('file/quiz/');
-            $file->move($path, $file_name);
-            $answer_file_path = $path . $file_name;
+            Storage::disk('ftp')->put("quizzes/files/" . $file_name, fopen($file, 'r+'));
+
+            $answer_file_path = "http://easyno.ir/quizzes/files/" . $file_name;
         }
 
         $new_quiz = Quiz::create([

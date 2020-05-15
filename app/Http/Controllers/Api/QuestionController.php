@@ -8,6 +8,7 @@ use App\Question;
 use App\Rules\persian_date;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class QuestionController extends Controller{
@@ -64,11 +65,11 @@ class QuestionController extends Controller{
             $ext = $image->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('images/questions/');
-            $image->move($path, $file_name);
+            Storage::disk('ftp')->put("questions/images/" . $file_name, fopen($image, 'r+'));
+
             $image_id = Image::create([
                 "name" => $file_name,
-                "path" => url('/images/questions/'),
+                "path" => "http://easyno.ir/questions/images",
             ])->id;
         }
 
@@ -79,9 +80,9 @@ class QuestionController extends Controller{
             $ext = $file->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('file/question/');
-            $file->move($path, $file_name);
-            $answer_file_path = url('/file/question/') . "/" . $file_name;
+            Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($image, 'r+'));
+
+            $answer_file_path ="http://easyno.ir/questions/files/" . $file_name;
         }
 
         $question = Question::create([
@@ -143,7 +144,7 @@ class QuestionController extends Controller{
 
         $question = Question::find($id);
         if($question == null)
-            return response()->json(["error" => ["message" => "question not found!"]],404);
+            return response()->json(["error" => ["message" => "question not found!"]], 404);
         $question->delete();
         return response()->json(["success" => ["message" => "question deleted successfully!"]], 200);
     }
