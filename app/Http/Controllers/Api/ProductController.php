@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Image;
 use App\Product;
 use Illuminate\Http\Request;
 use Validator;
@@ -26,6 +27,7 @@ class ProductController extends Controller{
         $validator = Validator::make($request->all(), [
             'title' => 'string|required',
             'price' => 'integer|required',
+            'image' => 'image|required',
             'gift_price' => 'integer|required',
             'grade_id' => 'integer|required|exists:grades,id',
             'download_able' => 'integer|required',
@@ -33,10 +35,12 @@ class ProductController extends Controller{
         ], [
             "title.required" => "title is required!",
             "price.required" => "title is required!",
+            "image.required" => "image is required!",
             "gift_price.required" => "title is required!",
             "grade_id.required" => "title is required!",
             "download_able.required" => "title is required!",
             "file.file" => "file not supported!",
+            "image.image" => "image format not supported!",
         ]);
 
         if($validator->fails()){
@@ -50,7 +54,7 @@ class ProductController extends Controller{
 
         if($request->download_able == 1){
             if(!isset($request->file)){
-                return response()->json(["error" => ["when you set download able to true file is needed!"]], 401);
+                return response()->json(["error" => ["message" => "when you set download able to true file is needed!"]], 401);
             }
         }
 
@@ -65,9 +69,24 @@ class ProductController extends Controller{
             $answer_file_path = $path . $file_name;
         }
 
+        $image = $request->file('image');
+        $image_id = null;
+        if($image != null){
+            $ext = $image->extension();
+            $file_name = time() . mt_rand() . "." . $ext;
+
+            $path = public_path('images/questions/');
+            $image->move($path, $file_name);
+            $image_id = Image::create([
+                "name" => $file_name,
+                "path" => url('/images/questions/'),
+            ])->id;
+        }
+
         Product::create([
             "title" => $request->title,
             "price" => $request->price,
+            "image_id" => $image_id,
             "gift_price" => $request->gift_price,
             "grade_id" => $request->grade_id,
             "download_able" => $request->download_able,
