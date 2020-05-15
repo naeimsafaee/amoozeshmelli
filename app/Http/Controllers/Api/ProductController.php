@@ -83,7 +83,7 @@ class ProductController extends Controller{
                 "path" => "http://easyno.ir",
             ])->id;
 
-            Storage::disk('ftp')->put($file_name, fopen($image, 'r+'));
+            Storage::disk('ftp')->put("image/product/" . $file_name, fopen($image, 'r+'));
         }
 
         Product::create([
