@@ -58,15 +58,15 @@ class ProductController extends Controller{
             }
         }
 
-        $answer_file_path = null;
-        $file = $request->file('answer_file');
+        $file_path = null;
+        $file = $request->file('file');
         if($file != null){
             $ext = $file->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
             $path = public_path('file/product/');
             $file->move($path, $file_name);
-            $answer_file_path = $path . $file_name;
+            $file_path = $path . $file_name;
         }
 
         $image = $request->file('image');
@@ -90,7 +90,7 @@ class ProductController extends Controller{
             "gift_price" => $request->gift_price,
             "grade_id" => $request->grade_id,
             "download_able" => $request->download_able,
-            "file_path" => $answer_file_path,
+            "file_path" => $file_path,
         ]);
 
         return response()->json(["success" => ["message" => "product added successfully!"]], 200);
