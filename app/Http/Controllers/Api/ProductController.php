@@ -66,7 +66,7 @@ class ProductController extends Controller{
 
             $path = public_path('file/product/');
             $file->move($path, $file_name);
-            $file_path = $path . $file_name;
+            $file_path = url('/file/product/') . "/" . $file_name;
         }
 
         $image = $request->file('image');
@@ -75,11 +75,11 @@ class ProductController extends Controller{
             $ext = $image->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('images/questions/');
+            $path = public_path('images/product/');
             $image->move($path, $file_name);
             $image_id = Image::create([
                 "name" => $file_name,
-                "path" => url('/images/questions/'),
+                "path" => url('/images/product/'),
             ])->id;
         }
 
