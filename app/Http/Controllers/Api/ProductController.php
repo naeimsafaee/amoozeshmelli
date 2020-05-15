@@ -29,6 +29,7 @@ class ProductController extends Controller{
             'gift_price' => 'integer|required',
             'grade_id' => 'integer|required|exists:grades,id',
             'download_able' => 'integer|required',
+            'file' => 'file',
         ], [
             "title.required" => "title is required!",
             "price.required" => "title is required!",
@@ -46,19 +47,64 @@ class ProductController extends Controller{
             ], 401);
         }
 
-        Product::create([
+        $answer_file_path = null;
+        $file = $request->file('answer_file');
+        if($file != null){
+            $ext = $file->extension();
+            $file_name = time() . mt_rand() . "." . $ext;
 
+            $path = public_path('file/product/');
+            $file->move($path, $file_name);
+            $answer_file_path = $path . $file_name;
+        }
+
+        Product::create([
+            "title" => $request->title,
+            "price" => $request->price,
+            "gift_price" => $request->gift_price,
+            "grade_id" => $request->grade_id,
+            "download_able" => $request->download_able,
+            "file_path" => $answer_file_path,
         ]);
 
+        return response()->json(["success" => ["message" => "product added successfully!"]], 200);
     }
 
     /**
      * Display the specified resource.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id){
-        //
+
+        $product = Product::find($id);
+        $product->grade_id;
+
+        return response()->json(["data" => $product], 200);
+    }
+
+    public function show_with_grade_id(Request $request){
+
+        $products = Product::where("grade_id", $request->grade_id)->get();
+
+        foreach($products as $product){
+            $product->grade_id;
+        }
+
+        return response()->json(["data_count" => $products->count(), "data" => $products], 200);
+    }
+
+    public function show_products(Request $request){
+
+        $user = $request->user();
+
+        $products = Product::where("grade_id", $user->grade_id)->get();
+
+        foreach($products as $product){
+            $product->grade_id;
+        }
+
+        return response()->json(["data_count" => $products->count(), "data" => $products], 200);
     }
 
     /**
@@ -79,4 +125,5 @@ class ProductController extends Controller{
     public function destroy($id){
         //
     }
+
 }

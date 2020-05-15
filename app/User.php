@@ -63,8 +63,7 @@ class User extends Authenticatable{
 
     public function scopeTeacherOnly($query){
 
-        return $query->whereIn('users.id' ,
-            Teacher::query()->select("user_id"));
+        return $query->whereIn('users.id', Teacher::query()->select("user_id"));
     }
 
 }
