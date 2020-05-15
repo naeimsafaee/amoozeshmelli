@@ -108,6 +108,7 @@ class ProductController extends Controller{
 
         $product = Product::find($id);
         $product->grade_id;
+        $product->image;
 
         return response()->json(["data" => $product], 200);
     }
@@ -118,6 +119,7 @@ class ProductController extends Controller{
 
         foreach($products as $product){
             $product->grade_id;
+            $product->image;
         }
 
         return response()->json(["data_count" => $products->count(), "data" => $products], 200);
@@ -131,6 +133,7 @@ class ProductController extends Controller{
 
         foreach($products as $product){
             $product->grade_id;
+            $product->image;
         }
 
         return response()->json(["data_count" => $products->count(), "data" => $products], 200);
