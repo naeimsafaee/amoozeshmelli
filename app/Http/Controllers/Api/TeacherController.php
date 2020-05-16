@@ -194,6 +194,7 @@ class TeacherController extends Controller{
     public function show($id){
 
         $teacher = Teacher::find($id);
+        $teacher->info;
         if($teacher == null)
             return response()->json(["error" => ["message" => "teacher not found!"]], 404);
 
@@ -265,9 +266,9 @@ class TeacherController extends Controller{
 
         $teacher = Teacher::find($id);
 
-        if($teacher == null){
+        if($teacher == null)
             return response()->json(["error" => ["message" => "teacher not found!"]], 404);
-        }
+
         $teacher->delete();
         return response()->json(["success" => ["message" => "teacher successfully removed!"]], 200);
     }
