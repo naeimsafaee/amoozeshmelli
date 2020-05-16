@@ -189,28 +189,86 @@ class TeacherController extends Controller{
     /**
      * Display the specified resource.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id){
-        //
+
+        $teacher = Teacher::find($id);
+        if($teacher == null)
+            return response()->json(["error" => ["message" => "teacher not found!"]], 404);
+
+        return response()->json(["data" => $teacher], 200);
     }
 
     /**
      * Update the specified resource in storage.
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id){
-        //
+
+        $validator = Validator::make($request->all(), [
+            'teacher_name' => 'string|required',
+            'teacher_phone' => 'required|iran_mobile',
+            'grade_id' => 'integer|required|exists:grades,id',
+            'city_id' => 'integer|required|exists:cities,id',
+            'is_global' => 'integer|required',
+        ], [
+            "is_global.required" => "is_global is required!",
+            "is_global.integer" => "is_global is not an integer!",
+            "teacher_phone.required" => "phone is required!",
+            "teacher_phone.iran_mobile" => "phone must be an iran_mobile!",
+            "teacher_name.required" => "fullName is required!",
+            "teacher_name.string" => "fullName must be a string!",
+            "city_id.required" => "city_id is required!",
+            "city_id.exists" => "city_id does not exist!",
+            "grade_id.required" => "grade_id is required!",
+            "grade_id.exists" => "grade_id does not exist!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $teacher = Teacher::find($id);
+
+        if($teacher == null)
+            return response()->json(["error" => ["message" => "teacher not found!"]], 404);
+
+        $teacher->is_global = $request->is_global;
+        $teacher->save();
+
+        $user_id = $teacher->user_id;
+
+        $user = User::find($user_id);
+        $user->fullName = $request->teacher_name;
+        $user->phone = $request->teacher_phone;
+        $user->grade_id = $request->grade_id;
+        $user->city_id = $request->city_id;
+        $user->save();
+
+        return response()->json(["success" => ["message" => "teacher successfully changed!"]], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id){
-        //
+
+        $teacher = Teacher::find($id);
+
+        if($teacher == null){
+            return response()->json(["error" => ["message" => "teacher not found!"]], 404);
+        }
+        $teacher->delete();
+        return response()->json(["success" => ["message" => "teacher successfully removed!"]], 200);
     }
 }

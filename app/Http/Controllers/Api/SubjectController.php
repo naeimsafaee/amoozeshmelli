@@ -86,7 +86,7 @@ class SubjectController extends Controller{
         foreach($teachers_ids as $teachers_id){
             TeacherToSubjects::create([
                 "teacher_id" => $teachers_id,
-                "subject_id" => $new_subject->id
+                "subject_id" => $new_subject->id,
             ]);
         }
 
@@ -97,10 +97,16 @@ class SubjectController extends Controller{
     /**
      * Display the specified resource.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     public function show($id){
-        //
+
+        $subject = Subject::find($id);
+
+        if($subject == null)
+            return response()->json(["error" => ["message" => "subject not found!"]], 404);
+
+        return response()->json(["data" => $subject], 200);
     }
 
     /**
@@ -136,13 +142,6 @@ class SubjectController extends Controller{
         $subject->title = $request->subject_title;
         $subject->lesson_id = $request->lesson_id;
         $subject->save();
-
-        /*
-                if(isset($request->grade_id)){
-                    if($request->grade_id != null){
-                        GradeToLesson::
-                    }
-                }*/
 
         return response()->json(["success" => ["message" => "lesson successfully changed!"]], 200);
     }
