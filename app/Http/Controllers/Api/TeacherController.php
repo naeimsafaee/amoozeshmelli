@@ -38,6 +38,7 @@ class TeacherController extends Controller{
             if($user->teacher != null){
                 $main_array[$i]["id"] = $user->id;
                 $main_array[$i]["teacher_id"] = $user["teacher"]["id"];
+                $main_array[$i]["teacher_phone"] = $user["phone"];
                 $main_array[$i]["fullName"] = $user["fullName"];
                 $main_array[$i]["grade"] = $user["grade"];
                 $main_array[$i]["city"] = $user["city"];
