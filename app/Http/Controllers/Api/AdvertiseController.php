@@ -27,7 +27,7 @@ class AdvertiseController extends Controller{
 
         $validator = Validator::make($request->all(), [
             'title' => 'string|required',
-            'video.*' => 'mimes:mkv,mp4',
+            'video.*' => 'mimes:mkv,mp4|max:1024000',
             'gift' => 'integer|required',
             'count' => 'integer|required',
             'price' => 'integer|required',
