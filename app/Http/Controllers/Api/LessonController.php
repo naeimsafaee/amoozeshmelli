@@ -119,7 +119,7 @@ class LessonController extends Controller{
             ], 401);
         }
 
-        $new_lesson = Lesson::updateOrcreate([
+        $new_lesson = Lesson::create([
             "title" => $request->lesson_title,
         ]);
 
