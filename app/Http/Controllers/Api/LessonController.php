@@ -126,7 +126,7 @@ class LessonController extends Controller{
         $grades = $request->grade_ids;
 
         foreach($grades as $grade){
-            GradeToLesson::updateOrCreate([
+            GradeToLesson::create([
                 "grade_id" => $grade,
                 "lesson_id" => $new_lesson->id,
             ]);
