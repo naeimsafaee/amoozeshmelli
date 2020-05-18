@@ -87,6 +87,9 @@ Route::middleware(['auth:admin', 'admin_scope:admin'])->group(function(){
     Route::apiResource('product', 'Api\ProductController');
     Route::get('products/{grade_id}', 'Api\ProductController@show_with_grade_id');
     Route::get('products', 'Api\ProductController@show_products');
+
+    Route::post('check_token', 'PassportController@check_token');
+
 });
 
 

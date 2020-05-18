@@ -143,7 +143,6 @@ class PassportController extends Controller{
     }
 
     public function check_token(Request $request){
-
         return true;
     }
 
