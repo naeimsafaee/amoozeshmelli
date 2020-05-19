@@ -80,7 +80,7 @@ class QuestionController extends Controller{
             $ext = $file->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($image, 'r+'));
+            Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($file, 'r+'));
 
             $answer_file_path ="http://easyno.ir/questions/files/" . $file_name;
         }
