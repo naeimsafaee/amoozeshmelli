@@ -34,7 +34,7 @@ class SectionController extends Controller{
         $sections = Section::where([
             "teacher_id" => $request->teacher_id,
             "subject_id" => $request->subject_id,
-        ])->select("id", "title", "price", "gift_price", "early_price", "award", "pre_section_id", "opening_date", "can_pass")->get();
+        ])->select("id", "title", "price", "gift_price", "early_price" , "quiz_id", "award" , "helper_award", "pre_section_id", "opening_date", "can_pass")->get();
 
 
         return response()->json(["data_count" => $sections->count(), "data" => $sections], 200);
