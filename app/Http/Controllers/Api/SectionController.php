@@ -204,6 +204,7 @@ class SectionController extends Controller{
         $section->pre_section_id = $pre_section_id;
         $section->can_pass = $request->can_pass;
         $section->opening_date = $opening_date;
+        $section->save();
 
         return response()->json(["success" => ["message" => "section successfully edited!"]], 200);
     }
