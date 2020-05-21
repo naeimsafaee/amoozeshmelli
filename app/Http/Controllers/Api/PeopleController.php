@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\People;
 use App\PeopleToPercent;
+use App\Question;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -47,7 +48,30 @@ class PeopleController extends Controller{
             "advertise_id" => $request->advertise_id,
         ]);
 
-        return response()->json(["success" => ["message" => "percent added successfully!"]],200);
+        return response()->json(["success" => ["message" => "percent added successfully!"]], 200);
+    }
+
+    public function search_people(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'search' => 'string|required',
+        ], [
+            "name.string" => "name is not a string!",
+            "name.required" => "name is required!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $people = People::where("name", "LIKE", "%" . $request->name . "%")->get();
+
+        return response()->json(["data_count" => $people->count(), "data" => $people], 200);
     }
 
     /**
@@ -85,7 +109,12 @@ class PeopleController extends Controller{
             "name" => $request->name,
         ])->id;
 
-        return response()->json(["success" => ["message" => "people created successfully", "people_id" => $people_id]], 200);
+        return response()->json([
+            "success" => [
+                "message" => "people created successfully",
+                "people_id" => $people_id,
+            ],
+        ], 200);
     }
 
     /**
@@ -110,9 +139,15 @@ class PeopleController extends Controller{
     /**
      * Remove the specified resource from storage.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id){
-        //
+        $people = People::find($id);
+        if($people == null)
+            return response()->json(["error" => ["message" => "people not found!"]], 404);
+        $people->delete();
+        return response()->json(["success" => ["message" => "people deleted successfully!"]], 200);
+
     }
+
 }

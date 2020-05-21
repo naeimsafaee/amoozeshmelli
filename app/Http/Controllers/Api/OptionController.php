@@ -7,6 +7,7 @@ use App\Image;
 use App\Options;
 use App\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use PhpOption\Option;
 use Validator;
 
@@ -65,11 +66,11 @@ class OptionController extends Controller{
             $ext = $file->extension();
             $file_name = time() . mt_rand() . "." . $ext;
 
-            $path = public_path('images/options/');
-            $file->move($path, $file_name);
+            Storage::disk('ftp')->put("options/images/" . $file_name, fopen($file, 'r+'));
+
             $image_id = Image::create([
                 "name" => $file_name,
-                "path" => url('/images/options/'),
+                "path" => "http://easyno.ir/options/images",
             ])->id;
         }
 
@@ -132,10 +133,68 @@ class OptionController extends Controller{
      * Update the specified resource in storage.
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     public function update(Request $request, $id){
-        //
+        $validator = Validator::make($request->all(), [
+            'title' => 'string',
+            'image' => 'image',
+            'question_id' => 'required|integer|exists:questions,id',
+            'is_correct' => 'required|integer',
+        ], [
+            "title.required" => "title is required!",
+            "image.image" => "image is not an image!",
+            "question_id.required" => "question_id is required!",
+            "question_id.exists" => "question_id does not exist!",
+            "is_correct.required" => "is_correct is required!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $option = Options::find($id);
+        if($option == null){
+            return response()->json(["error" => ["message" => "option not found!"]], 404);
+        }
+
+        if($request->is_correct == 1){
+            $options = Options::where(["question_id" => $request->question_id, "is_correct" => 1])->get();
+
+            if($options->count() > 0){
+                return response()->json([
+                    "responseCode" => 401,
+                    'message' => "this question have a correct option now!",
+                ], 401);
+            }
+        }
+
+        $file = $request->file('image');
+        $image_id = null;
+        if($file != null){
+            $ext = $file->extension();
+            $file_name = time() . mt_rand() . "." . $ext;
+
+            Storage::disk('ftp')->put("options/images/" . $file_name, fopen($file, 'r+'));
+
+            $image_id = Image::create([
+                "name" => $file_name,
+                "path" => "http://easyno.ir/options/images",
+            ])->id;
+        }
+
+        $option->title = $request->title;
+        $option->image_id = $image_id;
+        $option->question_id = $request->question_id;
+        $option->is_correct = $request->is_correct;
+        $option->save();
+
+        return response()->json(["success" => ["message" => "option successfully edited!"]], 200);
     }
 
     /**

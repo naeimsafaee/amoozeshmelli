@@ -212,10 +212,17 @@ class SectionController extends Controller{
     /**
      * Remove the specified resource from storage.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id){
-        //
+
+        $section = Section::find($id);
+        if($section == null){
+            return response()->json(["error" => ["message" => "section not found!"]], 404);
+        }
+        $section->delete();
+
+        return response()->json(["success" => ["message" => "section successfully removed!"]], 200);
     }
 
 }

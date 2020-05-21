@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Image;
 use App\Question;
 use App\Rules\persian_date;
+use App\Section;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Storage;
@@ -129,10 +130,76 @@ class QuestionController extends Controller{
      * Update the specified resource in storage.
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id){
-        //
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'string',
+            'image' => 'image',
+            'quiz_id' => 'integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'subject_id' => 'required|integer|exists:subjects,id',
+            'answer_file' => 'file',
+        ], [
+            "title.required" => "title is required!",
+            "image.image" => "image is not an image!",
+            "quiz_id.required" => "quiz_id is required!",
+            "quiz_id.exists" => "quiz_id does not exist!",
+            "lesson_id.required" => "lesson_id is required!",
+            "lesson_id.exists" => "lesson_id does not exist!",
+            "subject_id.required" => "subject_id is required!",
+            "subject_id.exists" => "subject_id does not exist!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $question = Question::find($id);
+        if($question == null){
+            return response()->json(["error" => ["message" => "question not found!"]], 404);
+        }
+
+        $image = $request->file('image');
+        $image_id = null;
+        if($image != null){
+            $ext = $image->extension();
+            $file_name = time() . mt_rand() . "." . $ext;
+
+            Storage::disk('ftp')->put("questions/images/" . $file_name, fopen($image, 'r+'));
+
+            $image_id = Image::create([
+                "name" => $file_name,
+                "path" => "http://easyno.ir/questions/images",
+            ])->id;
+        }
+
+        $answer_file_path = null;
+        $file = $request->file('answer_file');
+        if($file != null){
+            $ext = $file->extension();
+            $file_name = time() . mt_rand() . "." . $ext;
+
+            Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($file, 'r+'));
+
+            $answer_file_path ="http://easyno.ir/questions/files/" . $file_name;
+        }
+
+        $question->title = $request->title;
+        $question->quiz_id = $request->quiz_id;
+        $question->lesson_id = $request->lesson_id;
+        $question->subject_id = $request->subject_id;
+        $question->image_id = $image_id;
+        $question->answer_file = $answer_file_path;
+        $question->save();
+
+        return response()->json(["success" => ["message" => "question successfully edited!"]], 200);
     }
 
     /**

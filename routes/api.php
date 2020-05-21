@@ -81,6 +81,7 @@ Route::middleware(['auth:admin', 'admin_scope:admin'])->group(function(){
 
     Route::apiResource('people', 'Api\PeopleController');
     Route::post('add_percent', 'Api\PeopleController@add_percent');
+    Route::post('search_people', 'Api\PeopleController@search_people');
 
     Route::apiResource('advertise', 'Api\AdvertiseController');
 
