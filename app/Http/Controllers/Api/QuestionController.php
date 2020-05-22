@@ -166,7 +166,7 @@ class QuestionController extends Controller{
             return response()->json(["error" => ["message" => "question not found!"]], 404);
         }
 
-        if(isset($request->image)){
+        if($request->has("image")){
             $image = $request->file('image');
             $image_id = null;
             if($image != null){
@@ -183,7 +183,7 @@ class QuestionController extends Controller{
             $question->image_id = $image_id;
         }
 
-        if(isset($request->answer_file)){
+        if($request->has("answer_file")){
             $answer_file_path = null;
             $file = $request->file('answer_file');
             if($file != null){
@@ -200,11 +200,11 @@ class QuestionController extends Controller{
 
         if($request->has("title"))
             $question->title = $request->title;
-        if(isset($request->quiz_id))
+        if($request->has("quiz_id"))
             $question->quiz_id = $request->quiz_id;
-        if(isset($request->lesson_id))
+        if($request->has("lesson_id"))
             $question->lesson_id = $request->lesson_id;
-        if(isset($request->subject_id))
+        if($request->has("subject_id"))
             $question->subject_id = $request->subject_id;
 
         $question->save();

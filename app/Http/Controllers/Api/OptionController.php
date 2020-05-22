@@ -174,7 +174,7 @@ class OptionController extends Controller{
             }
         }
 
-        if(isset($request->image)){
+        if($request->has("image")){
             $file = $request->file('image');
             $image_id = null;
             if($file != null){
@@ -191,9 +191,9 @@ class OptionController extends Controller{
             $option->image_id = $image_id;
         }
 
-        if(isset($request->title))
+        if($request->has("title"))
             $option->title = $request->title;
-        if(isset($request->question_id))
+        if($request->has("question_id"))
             $option->question_id = $request->question_id;
         $option->is_correct = $request->is_correct;
         $option->save();
