@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Lesson;
 use App\Quiz;
 use App\Rules\persian_date;
 use App\User;
@@ -137,10 +138,16 @@ class QuizController extends Controller{
     /**
      * Remove the specified resource from storage.
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id){
-        //
+
+        $quiz = Quiz::find($id);
+        if($quiz == null){
+            return response()->json(["error" => ["message" => "quiz not found!"]], 404);
+        }
+        $quiz->delete();
+        return response()->json(["success" => ["message" => "quiz removed successfully!"]], 200);
     }
 
 }
