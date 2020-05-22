@@ -139,8 +139,8 @@ class OptionController extends Controller{
         $validator = Validator::make($request->all(), [
             'title' => 'string',
             'image' => 'image',
-            'question_id' => 'required|integer|exists:questions,id',
-            'is_correct' => 'required|integer',
+            'question_id' => 'integer|exists:questions,id',
+            'is_correct' => 'require|integer',
         ], [
             "title.required" => "title is required!",
             "image.image" => "image is not an image!",
@@ -174,23 +174,27 @@ class OptionController extends Controller{
             }
         }
 
-        $file = $request->file('image');
-        $image_id = null;
-        if($file != null){
-            $ext = $file->extension();
-            $file_name = time() . mt_rand() . "." . $ext;
+        if(isset($request->image)){
+            $file = $request->file('image');
+            $image_id = null;
+            if($file != null){
+                $ext = $file->extension();
+                $file_name = time() . mt_rand() . "." . $ext;
 
-            Storage::disk('ftp')->put("options/images/" . $file_name, fopen($file, 'r+'));
+                Storage::disk('ftp')->put("options/images/" . $file_name, fopen($file, 'r+'));
 
-            $image_id = Image::create([
-                "name" => $file_name,
-                "path" => "http://easyno.ir/options/images",
-            ])->id;
+                $image_id = Image::create([
+                    "name" => $file_name,
+                    "path" => "http://easyno.ir/options/images",
+                ])->id;
+            }
+            $option->image_id = $image_id;
         }
 
-        $option->title = $request->title;
-        $option->image_id = $image_id;
-        $option->question_id = $request->question_id;
+        if(isset($request->title))
+            $option->title = $request->title;
+        if(isset($request->question_id))
+            $option->question_id = $request->question_id;
         $option->is_correct = $request->is_correct;
         $option->save();
 

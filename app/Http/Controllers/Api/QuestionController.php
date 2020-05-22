@@ -83,7 +83,7 @@ class QuestionController extends Controller{
 
             Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($file, 'r+'));
 
-            $answer_file_path ="http://easyno.ir/questions/files/" . $file_name;
+            $answer_file_path = "http://easyno.ir/questions/files/" . $file_name;
         }
 
         $question = Question::create([
@@ -138,8 +138,8 @@ class QuestionController extends Controller{
             'title' => 'string',
             'image' => 'image',
             'quiz_id' => 'integer|exists:quizzes,id',
-            'lesson_id' => 'required|integer|exists:lessons,id',
-            'subject_id' => 'required|integer|exists:subjects,id',
+            'lesson_id' => 'integer|exists:lessons,id',
+            'subject_id' => 'integer|exists:subjects,id',
             'answer_file' => 'file',
         ], [
             "title.required" => "title is required!",
@@ -166,37 +166,47 @@ class QuestionController extends Controller{
             return response()->json(["error" => ["message" => "question not found!"]], 404);
         }
 
-        $image = $request->file('image');
-        $image_id = null;
-        if($image != null){
-            $ext = $image->extension();
-            $file_name = time() . mt_rand() . "." . $ext;
+        if(isset($request->image)){
+            $image = $request->file('image');
+            $image_id = null;
+            if($image != null){
+                $ext = $image->extension();
+                $file_name = time() . mt_rand() . "." . $ext;
 
-            Storage::disk('ftp')->put("questions/images/" . $file_name, fopen($image, 'r+'));
+                Storage::disk('ftp')->put("questions/images/" . $file_name, fopen($image, 'r+'));
 
-            $image_id = Image::create([
-                "name" => $file_name,
-                "path" => "http://easyno.ir/questions/images",
-            ])->id;
+                $image_id = Image::create([
+                    "name" => $file_name,
+                    "path" => "http://easyno.ir/questions/images",
+                ])->id;
+            }
+            $question->image_id = $image_id;
         }
 
-        $answer_file_path = null;
-        $file = $request->file('answer_file');
-        if($file != null){
-            $ext = $file->extension();
-            $file_name = time() . mt_rand() . "." . $ext;
+        if(isset($request->answer_file)){
+            $answer_file_path = null;
+            $file = $request->file('answer_file');
+            if($file != null){
+                $ext = $file->extension();
+                $file_name = time() . mt_rand() . "." . $ext;
 
-            Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($file, 'r+'));
+                Storage::disk('ftp')->put("questions/files/" . $file_name, fopen($file, 'r+'));
 
-            $answer_file_path ="http://easyno.ir/questions/files/" . $file_name;
+                $answer_file_path = "http://easyno.ir/questions/files/" . $file_name;
+            }
+            $question->answer_file = $answer_file_path;
         }
 
-        $question->title = $request->title;
-        $question->quiz_id = $request->quiz_id;
-        $question->lesson_id = $request->lesson_id;
-        $question->subject_id = $request->subject_id;
-        $question->image_id = $image_id;
-        $question->answer_file = $answer_file_path;
+
+        if(isset($request->title))
+            $question->title = $request->title;
+        if(isset($request->quiz_id))
+            $question->quiz_id = $request->quiz_id;
+        if(isset($request->lesson_id))
+            $question->lesson_id = $request->lesson_id;
+        if(isset($request->subject_id))
+            $question->subject_id = $request->subject_id;
+
         $question->save();
 
         return response()->json(["success" => ["message" => "question successfully edited!"]], 200);
