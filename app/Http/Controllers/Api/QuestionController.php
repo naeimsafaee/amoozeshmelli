@@ -198,7 +198,7 @@ class QuestionController extends Controller{
         }
 
 
-        if(isset($request->title))
+        if($request->has("title"))
             $question->title = $request->title;
         if(isset($request->quiz_id))
             $question->quiz_id = $request->quiz_id;
