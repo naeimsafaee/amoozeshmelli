@@ -135,7 +135,7 @@ class QuestionController extends Controller{
     public function update(Request $request, $id){
 
         $validator = Validator::make($request->all(), [
-            'title' => 'string',
+            'title' => 'string|nullable',
             'image' => 'image',
             'quiz_id' => 'integer|exists:quizzes,id',
             'lesson_id' => 'integer|exists:lessons,id',
