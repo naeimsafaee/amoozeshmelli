@@ -56,10 +56,12 @@ class ImageController extends Controller{
 
         $sliders = Control::where("title", "slider_image")->get();
 
+        $main = [];
         foreach($sliders as $slider){
             $slider->image;
+            $main[] = $slider["image"];
         }
-        return response()->json(["data_count" => $sliders->count(), "data" => $sliders], 200);
+        return response()->json(["data_count" => $sliders->count(), "data" => $main], 200);
     }
 
 }
