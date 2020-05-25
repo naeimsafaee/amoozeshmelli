@@ -62,6 +62,7 @@ class ImageController extends Controller{
             $slider->image;
             $main[$i] = $slider["image"];
             $main[$i]["title"] = "متن تست اسلاید " . $i;
+            $i++;
         }
         return response()->json(["data_count" => $sliders->count(), "data" => $main], 200);
     }
