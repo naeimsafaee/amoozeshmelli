@@ -54,7 +54,9 @@ class LessonController extends Controller{
             $grade_to_lesson->lessons->image;
             if($grade_to_lesson["lessons"] == null)
                 continue;
-            $lessons[$i] = $grade_to_lesson["lessons"];
+            $lessons[$i]["id"] = $grade_to_lesson["lessons"]["id"];
+            $lessons[$i]["title"] = $grade_to_lesson["lessons"]["title"];
+            $lessons[$i]["url"] = $grade_to_lesson["lessons"]["image"]["url"];
             $i++;
         }
 
