@@ -11,4 +11,9 @@ class Lesson extends Model
 
     protected $hidden = ['created_at' , 'updated_at' , 'deleted_at'];
     protected $fillable = ["title"];
+
+    public function image(){
+        return $this->hasOne(Image::class, 'id', 'image_id');
+    }
+
 }

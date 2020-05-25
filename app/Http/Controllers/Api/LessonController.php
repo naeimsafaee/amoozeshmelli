@@ -48,11 +48,14 @@ class LessonController extends Controller{
         $grade_to_lessons = $user->grade_to_lessons;
 
         $lessons = [];
+        $i = 0;
         foreach($grade_to_lessons as $grade_to_lesson){
             $grade_to_lesson->lessons;
+            $grade_to_lesson->lessons->image;
             if($grade_to_lesson["lessons"] == null)
                 continue;
-            $lessons[] = $grade_to_lesson["lessons"];
+            $lessons[$i] = $grade_to_lesson["lessons"];
+            $i++;
         }
 
         return response()->json(["data_count" => count($lessons), "data" => $lessons], 200);
