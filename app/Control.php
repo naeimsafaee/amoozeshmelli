@@ -8,7 +8,7 @@ class Control extends Model{
 
 
     public function image(){
-        return $this->hasOne(Image::class, 'id', 'opt');
+        return $this->hasOne(Image::class, 'id', 'option');
     }
 
 }
