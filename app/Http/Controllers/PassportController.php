@@ -107,7 +107,7 @@ class PassportController extends Controller{
         $code = rand(1000, 9999);
 
         $user = User::where("phone", $request->phone);
-        if($user == null){
+        if($user->count() == 0){
             $user = User::updateOrcreate([
                 "phone" => $request->phone,
                 "code" => $code,
