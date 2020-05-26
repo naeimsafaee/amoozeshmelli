@@ -79,6 +79,36 @@ class PassportController extends Controller{
         return response()->json(["error" => ["message" => "code is't valid!"]], 401);
     }
 
+    public function login(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|iran_mobile|exists:users,phone',
+        ], [
+            "phone.required" => "phone is required!",
+            "phone.iran_mobile" => "phone number is not valid!",
+            "phone.exists" => "phone number does not exist!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $user = User::where("phone", $request->phone)->first();
+
+        $code = rand(1000, 9999);
+
+
+        $user->code = $code;
+        $user->save();
+
+        return response()->json(["code" => $code], 200);
+    }
+
     public function login_admin(Request $request){
 
         $validator = Validator::make($request->all(), [
