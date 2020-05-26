@@ -50,6 +50,7 @@ class PassportController extends Controller{
         $validator = Validator::make($request->all(), [
             'phone' => 'required|iran_mobile|exists:users,phone',
             'code' => 'required',
+            'is_app' => 'integer',
         ], [
             "phone.required" => "phone is required!",
             "code.required" => "code is required!",
@@ -70,7 +71,12 @@ class PassportController extends Controller{
 
         if($request->code == $user->code){
 
-            $token = $user->createToken('TutsForWeb', ["user"])->accessToken;
+            if($request->has("is_app")){
+                $token = $user->createToken('TutsForbApp', ["user"])->accessToken;
+            } else {
+                $token = $user->createToken('TutsForWeb', ["user"])->accessToken;
+            }
+
             $user->remember_token = $token;
             $user->save();
             return response()->json(["token" => $token], 200);
@@ -82,7 +88,7 @@ class PassportController extends Controller{
     public function login(Request $request){
 
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|iran_mobile|exists:users,phone',
+            'phone' => 'required|iran_mobile',
         ], [
             "phone.required" => "phone is required!",
             "phone.iran_mobile" => "phone number is not valid!",
@@ -98,13 +104,20 @@ class PassportController extends Controller{
             ], 401);
         }
 
-        $user = User::where("phone", $request->phone)->first();
-
         $code = rand(1000, 9999);
 
+        $user = User::where("phone", $request->phone);
+        if($user == null){
+            $user = User::updateOrcreate([
+                "phone" => $request->phone,
+                "code" => $code,
+            ]);
+        } else {
+            $user = $user->first();
 
-        $user->code = $code;
-        $user->save();
+            $user->code = $code;
+            $user->save();
+        }
 
         return response()->json(["code" => $code], 200);
     }
