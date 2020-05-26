@@ -36,6 +36,7 @@ Route::post('register', 'PassportController@register');
 Route::post('verify_sms', 'PassportController@verify_sms');
 Route::post('login_admin', 'PassportController@login_admin');
 Route::post('add_admin', 'PassportController@add_admin');
+Route::post('login', 'PassportController@login');
 
 
 Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
