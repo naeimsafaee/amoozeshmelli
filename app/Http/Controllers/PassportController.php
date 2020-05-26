@@ -112,14 +112,15 @@ class PassportController extends Controller{
                 "phone" => $request->phone,
                 "code" => $code,
             ]);
+            return response()->json(["code" => $code , "is_register" => 1], 200);
         } else {
             $user = $user->first();
 
             $user->code = $code;
             $user->save();
+            return response()->json(["code" => $code , "is_register" => 0], 200);
         }
 
-        return response()->json(["code" => $code], 200);
     }
 
     public function login_admin(Request $request){
