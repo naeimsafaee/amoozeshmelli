@@ -48,6 +48,7 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
     Route::get('u_products', 'Api\ProductController@show_products');
 
     Route::get('sliders', 'Api\ImageController@sliders');
+    Route::post('user_search_teacher_with_sub', 'Api\TeacherController@search_teacher_with_sub');
 
 });
 
