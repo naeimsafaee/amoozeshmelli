@@ -89,6 +89,7 @@ Route::middleware(['auth:admin', 'admin_scope:admin'])->group(function(){
 
     Route::post('percent/{id}', 'Api\PeopleController@show_percent');
     Route::put('percent/{id}', 'Api\PeopleController@edit_percent');
+    Route::delete('percent/{id}', 'Api\PeopleController@destroy_percent');
 
     Route::apiResource('advertise', 'Api\AdvertiseController');
 
