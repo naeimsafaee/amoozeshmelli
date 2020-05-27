@@ -123,7 +123,57 @@ class PeopleController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function show($id){
-        //
+
+    }
+
+    public function show_percent($id){
+
+        $people_to_percent = PeopleToPercent::find($id);
+        if($people_to_percent == null)
+            return response()->json(["error" => ["message" => "people to percent not found!"]],404);
+        return response()->json(["data" => $people_to_percent],200);
+    }
+
+    public function edit_percent(Request $request , $id){
+        $validator = Validator::make($request->all(), [
+            'percent' => 'integer|required',
+            'people_id' => 'integer|required|exists:people,id',
+            'quiz_id' => 'integer|exists:quizzes,id',
+            'product_id' => 'integer|exists:products,id',
+            'section_id' => 'integer|exists:sections,id',
+            'advertise_id' => 'integer|exists:advertises,id',
+        ], [
+            "percent.required" => "percent is required!",
+            "people_id.required" => "people_id is required!",
+            "people_id.exists" => "people_id does not exist!",
+            "quiz_id.exists" => "quiz_id does not exist!",
+            "product_id.exists" => "product_id does not exist!",
+            "section_id.exists" => "section_id does not exist!",
+            "advertise_id.exists" => "advertise_id does not exist!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $people_to_percent = PeopleToPercent::find($id);
+        if($people_to_percent == null)
+            return response()->json(["error" => ["message" => "people to percent not found!"]],404);
+
+        $people_to_percent->percent = $request->percent;
+        $people_to_percent->people_id = $request->people_id;
+        $people_to_percent->quiz_id = $request->quiz_id;
+        $people_to_percent->product_id = $request->product_id;
+        $people_to_percent->section_id = $request->section_id;
+        $people_to_percent->advertise_id = $request->advertise_id;
+        $people_to_percent->save();
+
+        return response()->json(["success" => ["message" => "people to percent edited successfully!"]],200);
     }
 
     /**
