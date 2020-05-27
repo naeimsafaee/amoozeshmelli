@@ -132,7 +132,7 @@ class PeopleController extends Controller{
 
         foreach($people_to_percent as $item){
             $item->people;
-            $item["people_name"] = $item["people"]["name"];
+            $item["people_id"] = $item["people"]["name"];
             unset($item["people"]);
         }
 
