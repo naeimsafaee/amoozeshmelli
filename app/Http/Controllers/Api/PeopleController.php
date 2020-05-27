@@ -128,7 +128,13 @@ class PeopleController extends Controller{
 
     public function show_percent($id){
 
-        $people_to_percent = PeopleToPercent::whereOr(["quiz_id" => $id , "section_id" => $id])->get();
+        $people_to_percent = PeopleToPercent::orWhere(["quiz_id" => $id , "section_id" => $id])->get();
+
+        foreach($people_to_percent as $item){
+            $item->people;
+            $item["people_name"] = $item["people"]["name"];
+            unset($item["people"]);
+        }
 
         return response()->json(["data_count" => $people_to_percent->count() , "data" => $people_to_percent],200);
     }
