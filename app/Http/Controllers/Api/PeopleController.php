@@ -128,10 +128,9 @@ class PeopleController extends Controller{
 
     public function show_percent($id){
 
-        $people_to_percent = PeopleToPercent::find($id);
-        if($people_to_percent == null)
-            return response()->json(["error" => ["message" => "people to percent not found!"]],404);
-        return response()->json(["data" => $people_to_percent],200);
+        $people_to_percent = PeopleToPercent::whereOr(["quiz_id" => $id , "section_id" => $id])->get();
+
+        return response()->json(["data_count" => $people_to_percent->count() , "data" => $people_to_percent],200);
     }
 
     public function edit_percent(Request $request , $id){
