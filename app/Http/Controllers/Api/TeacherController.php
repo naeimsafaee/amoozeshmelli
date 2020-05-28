@@ -83,11 +83,15 @@ class TeacherController extends Controller{
 
         $teachers = [];
 
+        $i = 0;
         foreach($teacher_to_subjects as $teacher_to_subject){
             $teacher_to_subject->teacher->info;
             $teacher_to_subject["teacher"]["info"]["teacher_id"] = $teacher_to_subject["teacher_id"];
 
-            $teachers[] = $teacher_to_subject["teacher"]["info"];
+            $teachers[$i] = $teacher_to_subject["teacher"]["info"];
+            $teachers[$i]["is_global"] = $teacher_to_subject["teacher"]["is_global"];
+
+            $i++;
         }
 
         return response()->json(["data_count" => $teacher_to_subjects->count(), "data" => $teachers], 200);
