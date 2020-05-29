@@ -88,7 +88,12 @@ class PeopleController extends Controller{
 
     public function show_percent($id){
 
-        $people_to_percent = PeopleToPercent::orWhere(["quiz_id" => $id , "section_id" => $id])->get();
+        $people_to_percent = PeopleToPercent::orWhere([
+            "product_id" => $id,
+            "section_id" => $id,
+            "quiz_id" => $id,
+            "advertise_id" => $id,
+        ])->get();
 
         foreach($people_to_percent as $item){
             $item->people;
@@ -96,10 +101,10 @@ class PeopleController extends Controller{
             unset($item["people"]);
         }
 
-        return response()->json(["data_count" => $people_to_percent->count() , "data" => $people_to_percent],200);
+        return response()->json(["data_count" => $people_to_percent->count(), "data" => $people_to_percent], 200);
     }
 
-    public function edit_percent(Request $request , $id){
+    public function edit_percent(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'percent' => 'integer|required',
             'people_id' => 'integer|required|exists:people,id',
@@ -128,7 +133,7 @@ class PeopleController extends Controller{
 
         $people_to_percent = PeopleToPercent::find($id);
         if($people_to_percent == null)
-            return response()->json(["error" => ["message" => "people to percent not found!"]],404);
+            return response()->json(["error" => ["message" => "people to percent not found!"]], 404);
 
         $people_to_percent->percent = $request->percent;
         $people_to_percent->people_id = $request->people_id;
@@ -138,7 +143,7 @@ class PeopleController extends Controller{
         $people_to_percent->advertise_id = $request->advertise_id;
         $people_to_percent->save();
 
-        return response()->json(["success" => ["message" => "people to percent edited successfully!"]],200);
+        return response()->json(["success" => ["message" => "people to percent edited successfully!"]], 200);
     }
 
     public function add_percent(Request $request){
