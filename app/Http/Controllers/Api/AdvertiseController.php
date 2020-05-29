@@ -18,6 +18,11 @@ class AdvertiseController extends Controller{
 
         $addvertise = Advertise::all();
 
+        foreach($addvertise as $item) {
+            $item->video;
+            unset($item["video_id"]);
+        }
+
         return response()->json(["data_count" => $addvertise->count(), "data" => $addvertise], 200);
     }
 
