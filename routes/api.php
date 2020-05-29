@@ -50,6 +50,8 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
     Route::get('sliders', 'Api\ImageController@sliders');
     Route::post('user_search_teacher_with_sub', 'Api\TeacherController@search_teacher_with_sub');
 
+    Route::post('user_search_section', 'Api\SectionController@section_with_teacher_and_subject');
+
 });
 
 Route::middleware(['auth:admin', 'admin_scope:admin'])->group(function(){
