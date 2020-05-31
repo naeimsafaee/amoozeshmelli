@@ -17,7 +17,7 @@ class GradeController extends Controller{
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(){
-        $grades = Grade::orderBy('created_at','ASC')->get();
+        $grades = Grade::orderBy('created_at', 'ASC')->get();
 
         return response()->json(["data_count" => $grades->count(), "data" => $grades], 200);
     }
@@ -79,7 +79,7 @@ class GradeController extends Controller{
         $grade->title = $request->grade_title;
         $grade->save();
 
-        return response()->json(["success" => ["message" => "grade successfully edited!"]],200);
+        return response()->json(["success" => ["message" => "grade successfully edited!"]], 200);
     }
 
     /**
