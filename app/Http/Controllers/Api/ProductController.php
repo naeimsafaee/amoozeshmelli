@@ -143,7 +143,7 @@ class ProductController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id){
-        //
+        
     }
 
     /**
@@ -152,7 +152,7 @@ class ProductController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function destroy($id){
-        //
+
     }
 
 }
