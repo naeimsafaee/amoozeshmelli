@@ -17,7 +17,7 @@ class GradeController extends Controller{
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(){
-        $grades = Grade::orderBy('created_at','DESC')->get();
+        $grades = Grade::orderBy('created_at','ASC')->get();
 
         return response()->json(["data_count" => $grades->count(), "data" => $grades], 200);
     }
