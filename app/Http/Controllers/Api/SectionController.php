@@ -64,7 +64,7 @@ class SectionController extends Controller{
             'helper_award' => 'required|integer',
             'teacher_id' => 'required|integer|exists:teachers,id',
             'subject_id' => 'required|integer|exists:subjects,id',
-            'quiz_id' => 'integer|exists:quizzes,id',
+            'quiz_id' => 'exists:quizzes,id',
             'pre_section_id' => 'integer|exists:sections,id',
             'can_pass' => 'integer|required',
             'opening_date' => ["required", new persian_date()],
