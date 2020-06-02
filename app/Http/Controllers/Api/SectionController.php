@@ -41,9 +41,9 @@ class SectionController extends Controller{
 
         foreach($sections as $section){
             if($section["opening_date"] > $now)
-                $section["date_is_passed"] = true;
+                $section["is_locked"] = false;
             else
-                $section["date_is_passed"] = false;
+                $section["is_locked"] = true;
         }
 
 
