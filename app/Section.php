@@ -21,7 +21,7 @@ class Section extends Model{
         'can_pass',
     ];
 
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at' , 'opening_date'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     protected $appends = ["shamsi_opening_date"];
 

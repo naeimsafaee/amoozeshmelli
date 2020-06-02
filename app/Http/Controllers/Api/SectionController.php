@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Rules\persian_date;
 use App\Section;
+use DateTime;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -34,7 +35,16 @@ class SectionController extends Controller{
         $sections = Section::where([
             "teacher_id" => $request->teacher_id,
             "subject_id" => $request->subject_id,
-        ])->select("id", "title", "price", "gift_price", "early_price" , "quiz_id", "award" , "helper_award", "pre_section_id", "opening_date", "can_pass")->get();
+        ])->select("id", "title", "price", "gift_price", "early_price", "quiz_id", "award", "helper_award", "pre_section_id", "opening_date", "can_pass")->get();
+
+        $now = new DateTime();
+
+        foreach($sections as $section){
+            if($section["opening_date"] > $now)
+                $section["date_is_passed"] = true;
+            else
+                $section["date_is_passed"] = false;
+        }
 
 
         return response()->json(["data_count" => $sections->count(), "data" => $sections], 200);
@@ -64,7 +74,7 @@ class SectionController extends Controller{
             'helper_award' => 'required|integer',
             'teacher_id' => 'required|integer|exists:teachers,id',
             'subject_id' => 'required|integer|exists:subjects,id',
-            'quiz_id' => 'exists:quizzes,id',
+            //            'quiz_id' => 'exists:quizzes,id',
             'pre_section_id' => 'integer|exists:sections,id',
             'can_pass' => 'integer|required',
             'opening_date' => ["required", new persian_date()],
