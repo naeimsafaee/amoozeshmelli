@@ -65,6 +65,9 @@ class QuizController extends Controller{
         foreach($question as $q){
             $q->image;
             unset($q["image_id"]);
+
+            $q["image_url"] = $q["image"]["url"];
+            unset($q["image"]);
         }
 
         return response()->json(["data_count" => $question->count() , "data" => $question] ,200);

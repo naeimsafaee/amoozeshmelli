@@ -8,7 +8,7 @@ class Question extends Model{
 
     protected $fillable = ['title', 'image_id', 'quiz_id', 'lesson_id', 'subject_id', 'answer_file'];
 
-    protected $hidden = ['created_at', 'updated_at',];
+    protected $hidden = ['created_at', 'updated_at',"quiz_id" , "lesson_id" , "subject_id"];
 
     public function quiz(){
         return $this->hasOne(Quiz::class, 'id', 'quiz_id');
