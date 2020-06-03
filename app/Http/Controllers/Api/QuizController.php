@@ -62,6 +62,11 @@ class QuizController extends Controller{
 
         $question = $question->take($request->how_many)->get();
 
+        foreach($question as $q){
+            $q->image;
+            unset($image_id);
+        }
+
         return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
     }
 

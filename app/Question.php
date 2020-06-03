@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model{
 
-    protected $fillable = ['title', 'image_id', 'quiz_id', 'lesson_id', 'subject_id' , 'answer_file'];
+    protected $fillable = ['title', 'image_id', 'quiz_id', 'lesson_id', 'subject_id', 'answer_file'];
 
     protected $hidden = ['created_at', 'updated_at',];
 
