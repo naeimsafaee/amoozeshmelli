@@ -62,14 +62,21 @@ class QuizController extends Controller{
 
         $question = $question->take($request->how_many)->get();
 
-        $i = 0;
         foreach($question as $q){
             $q->image;
             $options = $q->options;
+            $i = 0;
             foreach($options as $option){
                 $option->image;
+
+                $q["opt_" . $i]["id"] = $option["id"];
+                $q["opt_" . $i]["title"] = $option["title"];
+                $q["opt_" . $i]["image_url"] = $option["image"]["url"];
+
+                $i++;
             }
 
+            unset($option["options"]);
             $q["image_url"] = $q["image"]["url"];
             unset($q["image"]);
             unset($q["image_id"]);
