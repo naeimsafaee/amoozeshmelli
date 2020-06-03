@@ -69,9 +69,9 @@ class QuizController extends Controller{
             foreach($options as $option){
                 $option->image;
 
-                $q["opt_" . $i]["id"] = $option["id"];
-                $q["opt_" . $i]["title"] = $option["title"];
-                $q["opt_" . $i]["image_url"] = $option["image"]["url"];
+//                $q["opt_" . $i]["id"] = $option["id"];
+//                $q["opt_" . $i]["title"] = $option["title"];
+//                $q["opt_" . $i]["image_url"] = $option["image"]["url"];
 
                 $i++;
             }
