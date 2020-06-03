@@ -54,6 +54,8 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
 
     Route::post('user_part/{id}' , 'Api\PartController@show');
 
+    Route::post('make_quiz' , 'Api\QuizController@make_quiz');
+
 });
 
 Route::middleware(['auth:admin', 'admin_scope:admin'])->group(function(){

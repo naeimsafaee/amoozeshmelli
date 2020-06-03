@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Lesson;
+use App\Question;
 use App\Quiz;
 use App\Rules\persian_date;
 use App\User;
@@ -29,14 +30,40 @@ class QuizController extends Controller{
     }
 
     public function search_quiz(Request $request){
-        $quizzes = Quiz::where("title" , "like" , "%" . $request->title . "%")->get();
+        $quizzes = Quiz::where("title", "like", "%" . $request->title . "%")->get();
 
-//        $collection = $quizzes->getCollection();
+        //        $collection = $quizzes->getCollection();
 
         return response()->json([
             "data_count" => $quizzes->count(),
             "data" => $quizzes,
         ], 200);
+    }
+
+
+    public function make_quiz(Request $request){
+        $validator = Validator::make($request->all(), [
+            'lesson_id' => "integer|required|exists:lessons,id",
+            'how_many' => "integer|required",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+            ], 401);
+        }
+
+        if($request->has("subject_id")){
+            $question = Question::where(["lesson" => $request->lesson_id, "subject_id" => $request->subject_id]);
+        } else {
+            $question = Question::where(["lesson" => $request->lesson_id]);
+        }
+
+        $question->take($request->how_many);
+
+        return response()->json($question ,200);
     }
 
     /**
@@ -82,10 +109,10 @@ class QuizController extends Controller{
             ], 401);
         }
 
-        $quiz_date = explode("/" , $request->quiz_date);
+        $quiz_date = explode("/", $request->quiz_date);
 
-        $quiz_date = jalali_to_gregorian($quiz_date[0] , $quiz_date[1] , $quiz_date[2]);
-        $quiz_date = implode("-" , $quiz_date);
+        $quiz_date = jalali_to_gregorian($quiz_date[0], $quiz_date[1], $quiz_date[2]);
+        $quiz_date = implode("-", $quiz_date);
 
         $answer_file_path = null;
         $file = $request->file('answer_file');
