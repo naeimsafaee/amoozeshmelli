@@ -64,6 +64,7 @@ class QuizController extends Controller{
 
         foreach($question as $q){
             $q->image;
+            $q->options;
             unset($q["image_id"]);
 
             $q["image_url"] = $q["image"]["url"];

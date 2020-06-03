@@ -26,4 +26,8 @@ class Question extends Model{
         return $this->hasOne(Image::class, 'id', 'image_id');
     }
 
+    public function options(){
+        return $this->hasMany(Options::class, 'id', 'question_id');
+    }
+
 }
