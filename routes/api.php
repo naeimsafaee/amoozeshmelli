@@ -52,6 +52,8 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
 
     Route::post('user_search_section', 'Api\SectionController@section_with_teacher_and_subject');
 
+    Route::post('user_part' , 'Api\PartController@show');
+
 });
 
 Route::middleware(['auth:admin', 'admin_scope:admin'])->group(function(){
