@@ -60,7 +60,7 @@ class QuizController extends Controller{
             $question = Question::where(["lesson_id" => $request->lesson_id]);
         }
 
-        $question->take($request->how_many)->get();
+        $question->get();
 
 
         return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
