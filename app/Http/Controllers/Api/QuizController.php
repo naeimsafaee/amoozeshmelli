@@ -62,13 +62,16 @@ class QuizController extends Controller{
 
         $question = $question->take($request->how_many)->get();
 
+        $i = 0;
         foreach($question as $q){
             $q->image;
-            $q->options;
-            unset($q["image_id"]);
+            $option = $q->options;
+            $option->image;
+
 
             $q["image_url"] = $q["image"]["url"];
             unset($q["image"]);
+            unset($q["image_id"]);
         }
 
         return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
