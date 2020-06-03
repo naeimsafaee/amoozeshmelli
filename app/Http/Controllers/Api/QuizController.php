@@ -40,7 +40,6 @@ class QuizController extends Controller{
         ], 200);
     }
 
-
     public function make_quiz(Request $request){
         $validator = Validator::make($request->all(), [
             'lesson_id' => "integer|required|exists:lessons,id",
@@ -63,7 +62,8 @@ class QuizController extends Controller{
 
         $question->take($request->how_many);
 
-        return response()->json($question ,200);
+
+        return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
     }
 
     /**
