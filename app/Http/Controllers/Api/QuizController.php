@@ -55,9 +55,9 @@ class QuizController extends Controller{
         }
 
         if($request->has("subject_id")){
-            $question = Question::where(["lesson" => $request->lesson_id, "subject_id" => $request->subject_id]);
+            $question = Question::where(["lesson_id" => $request->lesson_id, "subject_id" => $request->subject_id]);
         } else {
-            $question = Question::where(["lesson" => $request->lesson_id]);
+            $question = Question::where(["lesson_id" => $request->lesson_id]);
         }
 
         $question->take($request->how_many);
