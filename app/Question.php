@@ -27,7 +27,7 @@ class Question extends Model{
     }
 
     public function options(){
-        return $this->hasMany(Options::class, 'id', 'question_id');
+        return $this->hasMany(Options::class, 'question_id', 'id');
     }
 
 }
