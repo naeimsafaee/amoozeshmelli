@@ -92,9 +92,18 @@ class QuizController extends Controller{
             $quiz_ids[] = $section["quiz_id"];
         }
 
-        $quiz = Quiz::whereNotIn('id', $quiz_ids)->get();
+        $quizzes = Quiz::whereNotIn('id', $quiz_ids)->get();
 
-        return response()->json(["success" => $quiz], 200);
+        $now = new DateTime();
+
+        foreach($quizzes as $quiz){
+            if($quiz["quiz_date"] > $now)
+                $quiz["is_locked"] = false;
+            else
+                $quiz["is_locked"] = true;
+        }
+
+        return response()->json(["success" => $quizzes], 200);
     }
 
     /**

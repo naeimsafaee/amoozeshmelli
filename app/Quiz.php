@@ -11,7 +11,7 @@ class Quiz extends Model
 
     protected $fillable = ['title' , 'quiz_date' , 'quiz_time' , 'award' , 'price' , 'gift_price' , 'early_price' , 'answer_file'];
 
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at' , 'quiz_date'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     protected $appends = ["shamsi_quiz_date"];
 
