@@ -65,24 +65,18 @@ class QuizController extends Controller{
         foreach($question as $q){
             $q->image;
             $options = $q->options;
-            $i = 0;
+
             foreach($options as $option){
                 $option->image;
-
-                $temp = ["id" => $option["id"], "title" => $option["title"], "image_url" => $option["image"]["url"]];
-
-                $q["opt_" . $i] = $temp;
-
-                $i++;
             }
 
-            //            unset($q["options"]);
+            unset($q["options"]);
             $q["image_url"] = $q["image"]["url"];
             unset($q["image"]);
             unset($q["image_id"]);
         }
 
-        return response()->json(["data_count" => $question->count(), "data" => $question], 200);
+        return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
     }
 
     /**
