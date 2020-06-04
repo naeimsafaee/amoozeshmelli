@@ -153,7 +153,7 @@ class ProductController extends Controller{
             $product->image;
         }
 
-        return response()->json(["data_count" => $products->count(), "data" => $products], 200);
+        return response()->json(["data_count" => $product_to_grades->count(), "data" => $products], 200);
     }
 
     /**
