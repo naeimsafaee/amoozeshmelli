@@ -94,7 +94,7 @@ class ProductController extends Controller{
             "file_path" => $file_path,
         ])->id;
 
-        $grades = explode("," , $request->grade_ids);
+        $grades = explode(",", $request->grade_ids);
 
         foreach($grades as $grade){
             ProductToGrade::create([
@@ -176,7 +176,7 @@ class ProductController extends Controller{
             'price' => 'integer|required',
             'image' => 'image|required',
             'gift_price' => 'integer|required',
-            'grade_id' => 'integer|required|exists:grades,id',
+            'grade_ids' => 'integer|required',
             'download_able' => 'integer|required',
             'file' => 'file',
         ], [
@@ -236,12 +236,23 @@ class ProductController extends Controller{
         $product->title = $request->title;
         $product->price = $request->price;
         $product->gift_price = $request->gift_price;
-        $product->grade_id = $request->grade_id;
         $product->download_able = $request->download_able;
         $product->image_id = $image_id;
         $product->file_path = $file_path;
         $product->save();
 
+
+        $product_to_grades = ProductToGrade::where("product_id", $product->id)->get();
+        $product_to_grades->delete();
+
+        $grades = explode(",", $request->grade_id);
+
+        foreach($grades as $grade){
+            ProductToGrade::create([
+                "product_id" => $product->id,
+                "grade_id" => $grade,
+            ]);
+        }
 
         return response()->json(["success" => ["message" => "product added successfully!"]], 200);
     }
