@@ -70,7 +70,6 @@ class QuizController extends Controller{
                 $option->image;
             }
 
-            unset($q["options"]);
             $q["image_url"] = $q["image"]["url"];
             unset($q["image"]);
             unset($q["image_id"]);
