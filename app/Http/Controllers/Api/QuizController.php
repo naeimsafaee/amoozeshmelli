@@ -7,6 +7,7 @@ use App\Lesson;
 use App\Question;
 use App\Quiz;
 use App\Rules\persian_date;
+use App\Section;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -78,11 +79,15 @@ class QuizController extends Controller{
             unset($q["image_id"]);
         }
 
-        return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
+        return response()->json(["data_count" => $question->count(), "data" => $question], 200);
     }
 
     public function get_complete_quiz(){
 
+        $quiz_ids = Section::all("quiz_id");
+
+        return response()->json(["success" => $quiz_ids,], 200);
+//        Quiz::whereNotIn('id', [100, 200])->get();
     }
 
     /**
