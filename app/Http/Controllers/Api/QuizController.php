@@ -92,8 +92,9 @@ class QuizController extends Controller{
             $quiz_ids[] = $section["quiz_id"];
         }
 
-        return response()->json(["success" => $quiz_ids], 200);
-//        Quiz::whereNotIn('id', [100, 200])->get();
+        $quiz = Quiz::whereNotIn('id', $quiz_ids)->get();
+
+        return response()->json(["success" => $quiz], 200);
     }
 
     /**
