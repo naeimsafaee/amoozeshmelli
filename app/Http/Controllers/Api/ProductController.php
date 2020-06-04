@@ -113,6 +113,7 @@ class ProductController extends Controller{
      */
     public function show($id){
 
+        return 123;
         $product = Product::find($id);
         $product->image;
 
