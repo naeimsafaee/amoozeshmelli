@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Image;
 use App\Product;
+use App\ProductToGrade;
 use App\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,8 @@ class ProductController extends Controller{
             'price' => 'integer|required',
             'image' => 'image|required',
             'gift_price' => 'integer|required',
-            'grade_id' => 'integer|required|exists:grades,id',
+            'grade_ids' => 'required|array',
+            'grade_ids.*' => 'exists:grades,id',
             'download_able' => 'integer|required',
             'file' => 'file',
         ], [
@@ -84,15 +86,22 @@ class ProductController extends Controller{
             Storage::disk('ftp')->put("products/images/" . $file_name, fopen($image, 'r+'));
         }
 
-        Product::create([
+        $product_id = Product::create([
             "title" => $request->title,
             "price" => $request->price,
             "image_id" => $image_id,
             "gift_price" => $request->gift_price,
-            "grade_id" => $request->grade_id,
             "download_able" => $request->download_able,
             "file_path" => $file_path,
-        ]);
+        ])->id;
+
+        $grades = $request->grade_ids;
+        foreach($grades as $grade){
+            ProductToGrade::create([
+                "product_id" => $product_id,
+                "grade_id" => $grade,
+            ]);
+        }
 
         return response()->json(["success" => ["message" => "product added successfully!"]], 200);
     }
@@ -105,8 +114,11 @@ class ProductController extends Controller{
     public function show($id){
 
         $product = Product::find($id);
-        $product->grade_id;
         $product->image;
+
+        $grades = ProductToGrade::where("product_id" , $product["id"])->get("grade_id")->grade_id;
+
+        $product["grades"] = $grades;
 
         return response()->json(["data" => $product], 200);
     }

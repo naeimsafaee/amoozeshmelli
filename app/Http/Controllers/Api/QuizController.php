@@ -81,6 +81,10 @@ class QuizController extends Controller{
         return response()->json(["data_count" => $question->count() , "data" => $question] ,200);
     }
 
+    public function get_complete_quiz(){
+
+    }
+
     /**
      * Display a listing of the resource.
      * @return \Illuminate\Http\Response
