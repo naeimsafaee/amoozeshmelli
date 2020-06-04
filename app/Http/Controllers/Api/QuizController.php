@@ -84,7 +84,13 @@ class QuizController extends Controller{
 
     public function get_complete_quiz(){
 
-        $quiz_ids = Section::select('quiz_id')->all();
+        $sections = Section::all();
+
+        $quiz_ids = [];
+
+        foreach($sections as $section){
+            $quiz_ids[] = $section["quiz_id"];
+        }
 
         return response()->json(["success" => $quiz_ids], 200);
 //        Quiz::whereNotIn('id', [100, 200])->get();
