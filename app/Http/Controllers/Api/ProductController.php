@@ -32,8 +32,7 @@ class ProductController extends Controller{
             'price' => 'integer|required',
             'image' => 'image|required',
             'gift_price' => 'integer|required',
-            'grade_ids' => 'required|array',
-            'grade_ids.*' => 'exists:grades,id',
+            'grade_ids' => 'required',
             'download_able' => 'integer|required',
             'file' => 'file',
         ], [
@@ -95,7 +94,8 @@ class ProductController extends Controller{
             "file_path" => $file_path,
         ])->id;
 
-        $grades = $request->grade_ids;
+        $grades = explode("," , $request->grade_ids);
+
         foreach($grades as $grade){
             ProductToGrade::create([
                 "product_id" => $product_id,
@@ -116,7 +116,7 @@ class ProductController extends Controller{
         $product = Product::find($id);
         $product->image;
 
-        $grades = ProductToGrade::where("product_id" , $product["id"])->get("grade_id")->grade_id;
+        $grades = ProductToGrade::where("product_id", $product["id"])->get("grade_id")->grade_id;
 
         $product["grades"] = $grades;
 
