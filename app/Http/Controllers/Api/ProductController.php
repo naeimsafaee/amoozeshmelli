@@ -113,7 +113,6 @@ class ProductController extends Controller{
      */
     public function show($id){
 
-        return 123;
         $product = Product::find($id);
         $product->image;
 
@@ -140,10 +139,17 @@ class ProductController extends Controller{
 
         $user = $request->user();
 
-        $products = Product::where("grade_id", $user->grade_id)->get();
+        $product_to_grades = ProductToGrade::where("grade_id", $user->grade_id)->get();
+
+        $products = [];
+
+        foreach($product_to_grades as $product_to_grade){
+            $product_id = $product_to_grade["product_id"];
+
+            $products[] = Product::find($product_id);
+        }
 
         foreach($products as $product){
-            $product->grade_id;
             $product->image;
         }
 
