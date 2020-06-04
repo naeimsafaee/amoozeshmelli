@@ -125,8 +125,15 @@ class ProductController extends Controller{
 
     public function show_with_grade_id(Request $request){
 
-        $products = Product::where("grade_id", $request->grade_id)->get();
+        $product_to_grades = ProductToGrade::where("grade_id", $request->grade_id)->get();
 
+        $products = [];
+
+        foreach($product_to_grades as $product_to_grade){
+            $product_id = $product_to_grade["product_id"];
+
+            $products[] = Product::find($product_id);
+        }
         foreach($products as $product){
             $product->grade_id;
             $product->image;
