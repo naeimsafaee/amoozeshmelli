@@ -128,9 +128,9 @@ class QuizController extends Controller{
                 unset($option["image"]);
             }
 
-            $q["image_url"] = $question["image"]["url"];
-            unset($q["image"]);
-            unset($q["image_id"]);
+            $question["image_url"] = $question["image"]["url"];
+            unset($question["image"]);
+            unset($question["image_id"]);
         }
 
         return response()->json(["data_count" => $questions->count(), "data" => $questions], 200);
