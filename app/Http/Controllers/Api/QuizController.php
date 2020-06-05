@@ -102,7 +102,7 @@ class QuizController extends Controller{
 
             $expire_time = strtotime($quiz["quiz_date"]);
 
-            if($expire_time > $now)
+            if($expire_time < $now)
                 $quiz["is_locked"] = false;
             else
                 $quiz["is_locked"] = true;

@@ -38,9 +38,13 @@ class SectionController extends Controller{
         ])->select("id", "title", "price", "gift_price", "early_price", "quiz_id", "award", "helper_award", "pre_section_id", "opening_date", "can_pass")->get();
 
         $now = new DateTime();
+        $now = strtotime($now->format('Y-m-d'));
 
         foreach($sections as $section){
-            if($section["opening_date"] > $now)
+
+            $expire_time = strtotime($section["opening_date"]);
+
+            if($expire_time < $now)
                 $section["is_locked"] = false;
             else
                 $section["is_locked"] = true;
