@@ -95,7 +95,8 @@ class QuizController extends Controller{
 
         $quizzes = Quiz::whereNotIn('id', $quiz_ids)->get();
 
-        $now = strtotime(new DateTime());
+        $now = new DateTime();
+        $now = strtotime($now->format('Y-m-d'));
 
         foreach($quizzes as $quiz){
 
