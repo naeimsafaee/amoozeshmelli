@@ -103,12 +103,37 @@ class QuizController extends Controller{
             $expire_time = strtotime($quiz["quiz_date"]);
 
             if($expire_time < $now)
-                $quiz["is_locked"] = false;
-            else
+                $quiz["is_locked"] = false; else
                 $quiz["is_locked"] = true;
         }
 
         return response()->json(["data_count" => $quizzes->count(), "data" => $quizzes], 200);
+    }
+
+    public function show_questions_of_quiz($id){
+
+        $quiz = Quiz::find($id);
+        if($quiz == null)
+            return response()->json(["error" => ["message" => "quiz not found!"]], 404);
+
+        $questions = Question::where("quiz_id", $id)->get();
+        foreach($questions as $question){
+            $question->image;
+            $options = $question->options;
+
+            foreach($options as $option){
+                $option->image;
+
+                $option["image_url"] = $option["image"]["url"];
+                unset($option["image"]);
+            }
+
+            $q["image_url"] = $question["image"]["url"];
+            unset($q["image"]);
+            unset($q["image_id"]);
+        }
+
+        return response()->json(["data_count" => $questions->count(), "data" => $questions], 200);
     }
 
     /**

@@ -56,6 +56,7 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
 
     Route::post('make_quiz' , 'Api\QuizController@make_quiz');
     Route::post('complete_quiz' , 'Api\QuizController@get_complete_quiz');
+    Route::post('show_questions_of_quiz/{id}' , 'Api\QuizController@show_questions_of_quiz');
 
 });
 
