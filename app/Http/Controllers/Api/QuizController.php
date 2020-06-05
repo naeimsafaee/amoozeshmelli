@@ -85,7 +85,7 @@ class QuizController extends Controller{
 
     public function get_complete_quiz(){
 
-        $sections = Section::where("quiz_id" , "<>" , "")->get();
+        $sections = Section::where("quiz_id", "<>", "")->get();
 
         $quiz_ids = [];
 
@@ -99,12 +99,11 @@ class QuizController extends Controller{
 
         foreach($quizzes as $quiz){
             if($quiz["quiz_date"] > $now)
-                $quiz["is_locked"] = false;
-            else
+                $quiz["is_locked"] = false; else
                 $quiz["is_locked"] = true;
         }
 
-        return response()->json(["success" => $quizzes], 200);
+        return response()->json(["data_count" => $quizzes->count(), "data" => $quizzes], 200);
     }
 
     /**
