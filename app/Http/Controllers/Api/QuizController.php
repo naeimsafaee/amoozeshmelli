@@ -95,11 +95,15 @@ class QuizController extends Controller{
 
         $quizzes = Quiz::whereNotIn('id', $quiz_ids)->get();
 
-        $now = new DateTime();
+        $now = strtotime(new DateTime());
 
         foreach($quizzes as $quiz){
-            if($quiz["quiz_date"] > $now)
-                $quiz["is_locked"] = false; else
+
+            $expire_time = strtotime($quiz["quiz_date"]);
+
+            if($expire_time > $now)
+                $quiz["is_locked"] = false;
+            else
                 $quiz["is_locked"] = true;
         }
 
