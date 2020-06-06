@@ -125,7 +125,15 @@ class PartController extends Controller{
                 $question = $part["question"];
                 $question->image;
 
+                $question["image_url"] = $question["image"]["url"];
+
                 unset($question["image_id"]);
+                unset($question["image"]);
+            } else {
+
+                $part["video_url"] = $part["video"]["url"];
+
+                unset($part["video"]);
             }
             unset($part["video_id"]);
             unset($part["question_id"]);
