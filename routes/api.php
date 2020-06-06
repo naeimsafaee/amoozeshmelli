@@ -52,7 +52,7 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
 
     Route::post('user_search_section', 'Api\SectionController@section_with_teacher_and_subject');
 
-    Route::post('user_part/{id}' , 'Api\PartController@show');
+    Route::post('user_part/{id}' , 'Api\PartController@show_user_part');
 
     Route::post('make_quiz' , 'Api\QuizController@make_quiz');
     Route::post('complete_quiz' , 'Api\QuizController@get_complete_quiz');

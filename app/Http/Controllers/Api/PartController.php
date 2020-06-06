@@ -114,6 +114,21 @@ class PartController extends Controller{
         return response()->json(["data_count" => $parts->count(), "data" => $parts], 200);
     }
 
+    public function show_user_part($id){
+
+        $parts = Part::where("section_id", $id)->get();
+
+        foreach($parts as $part){
+            $part->question;
+            $part->video;
+            unset($part["video_id"]);
+            unset($part["question_id"]);
+            unset($part["section_id"]);
+        }
+
+        return response()->json(["data_count" => $parts->count(), "data" => $parts], 200);
+    }
+
     /**
      * Update the specified resource in storage.
      * @param \Illuminate\Http\Request $request
