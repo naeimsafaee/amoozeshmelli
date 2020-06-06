@@ -116,7 +116,7 @@ class PartController extends Controller{
 
     public function show_user_part($id){
 
-        $parts = Part::where("section_id", $id)->get();
+        $parts = Part::where("section_id", $id)->orderby("order" , "ASC")->get();
 
         foreach($parts as $part){
             $part->question;
