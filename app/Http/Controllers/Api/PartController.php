@@ -116,11 +116,17 @@ class PartController extends Controller{
 
     public function show_user_part($id){
 
-        $parts = Part::where("section_id", $id)->orderby("order" , "ASC")->get();
+        $parts = Part::where("section_id", $id)->orderby("order", "ASC")->get();
 
         foreach($parts as $part){
             $part->question;
             $part->video;
+            if($part["question"] != null){
+                $question = $part["question"];
+                $question->image;
+
+                unset($question["image_id"]);
+            }
             unset($part["video_id"]);
             unset($part["question_id"]);
             unset($part["section_id"]);
