@@ -137,6 +137,7 @@ class QuestionController extends Controller{
         $validator = Validator::make($request->all(), [
             'title' => 'string|nullable',
             'image' => 'image',
+            'need_delete_image' => 'integer',
             'quiz_id' => 'integer|exists:quizzes,id',
             'lesson_id' => 'integer|exists:lessons,id',
             'subject_id' => 'integer|exists:subjects,id',
@@ -166,21 +167,26 @@ class QuestionController extends Controller{
             return response()->json(["error" => ["message" => "question not found!"]], 404);
         }
 
-        if($request->has("image")){
-            $image = $request->file('image');
-            $image_id = null;
-            if($image != null){
-                $ext = $image->extension();
-                $file_name = time() . mt_rand() . "." . $ext;
+        if($request->has("need_delete_image")){
+            $question->image_id = null;
+        } else {
+            if($request->has("image")){
+                $image_id = null;
 
-                Storage::disk('ftp')->put("questions/images/" . $file_name, fopen($image, 'r+'));
+                $image = $request->file('image');
+                if($image != null){
+                    $ext = $image->extension();
+                    $file_name = time() . mt_rand() . "." . $ext;
 
-                $image_id = Image::create([
-                    "name" => $file_name,
-                    "path" => "http://easyno.ir/questions/images",
-                ])->id;
+                    Storage::disk('ftp')->put("questions/images/" . $file_name, fopen($image, 'r+'));
+
+                    $image_id = Image::create([
+                        "name" => $file_name,
+                        "path" => "http://easyno.ir/questions/images",
+                    ])->id;
+                }
+                $question->image_id = $image_id;
             }
-            $question->image_id = $image_id;
         }
 
         if($request->has("answer_file")){
@@ -196,7 +202,6 @@ class QuestionController extends Controller{
             }
             $question->answer_file = $answer_file_path;
         }
-
 
         if($request->has("title"))
             $question->title = $request->title;

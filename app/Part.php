@@ -22,5 +22,4 @@ class Part extends Model{
         return $this->hasOne(Section::class, 'id', 'section_id');
     }
 
-
 }

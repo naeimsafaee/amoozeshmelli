@@ -11,4 +11,9 @@ class Subject extends Model{
 
     protected $fillable = ["title", 'lesson_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at', 'lesson_id'];
+
+    public function lesson(){
+        return $this->hasOne(Lesson::class, 'id', 'lesson_id');
+    }
+
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Rules\persian_date;
 use App\Section;
+use App\User;
+use App\UserToSections;
 use DateTime;
 use Illuminate\Http\Request;
 use Validator;
@@ -40,18 +42,84 @@ class SectionController extends Controller{
         $now = new DateTime();
         $now = strtotime($now->format('Y-m-d'));
 
+        $user = $request->user();
+
         foreach($sections as $section){
 
             $expire_time = strtotime($section["opening_date"]);
 
-            if($expire_time < $now)
+            if($expire_time <= $now)
                 $section["is_locked"] = false;
             else
                 $section["is_locked"] = true;
+
+            $user_to_section = UserToSections::where(["section_id" => $section["id"], "user_id" => $user["id"]])->get();
+            if($user_to_section->count() == 0)
+                $section["has_paid"] = false;
+            else
+                $section["has_paid"] = true;
+
         }
 
-
         return response()->json(["data_count" => $sections->count(), "data" => $sections], 200);
+    }
+
+    public function buy_section(Request $request){
+
+        $user = $request->user();
+
+        $section = Section::find($request->section_id);
+
+        $now = new DateTime();
+        $now = strtotime($now->format('Y-m-d'));
+
+        $expire_time = strtotime($section["opening_date"]);
+
+        if($expire_time < $now)
+            $status = 0;
+        else
+            $status = 1;
+
+
+        $price = $section["price"];
+        $gift_price = $section["gift_price"];
+
+        $early_price = $section["early_price"];
+
+        $current_user = User::find($user["id"]);
+
+        if($status == 0){
+
+            if($user["wallet"] < $price){
+                return response()->json([
+                    "error" => "موجودی کیف پول کافی نمی باشد!",
+                ], 200);
+            }
+            if($user["gift_wallet"] < $gift_price){
+                return response()->json([
+                    "error" => "موجودی کیف پول هدیه کافی نمی باشد!",
+                ], 200);
+            }
+
+            $current_user->wallet -= $price;
+            $current_user->gift_wallet -= $gift_price;
+
+        } elseif($status == 1) {
+            if($user["wallet"] < $early_price){
+                return response()->json([
+                    "error" => "موجودی کیف پول کافی نمی باشد!",
+                ], 200);
+            }
+            $current_user->wallet -= $early_price;
+        }
+
+        $current_user->save();
+
+        UserToSections::create([
+            "user_id" => $user["id"],
+            "section_id" => $request->section_id,
+        ]);
+        return response()->json(["data" => "عملیات خرید با موفقیت انجام شد!"], 200);
     }
 
     /**

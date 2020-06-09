@@ -7,11 +7,96 @@ use App\Image;
 use App\Product;
 use App\ProductToGrade;
 use App\Section;
+use App\User;
+use App\UserToProducts;
+use App\UserToSections;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class ProductController extends Controller{
+
+    public function show_product_with_lesson_id(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'lesson_id' => 'integer|required|exists:lessons,id',
+        ], [
+            "title.required" => "title is required!",
+            "price.required" => "title is required!",
+            "image.required" => "image is required!",
+            "gift_price.required" => "title is required!",
+            "grade_id.required" => "title is required!",
+            "download_able.required" => "title is required!",
+            "file.file" => "file not supported!",
+            "image.image" => "image format not supported!",
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "responseCode" => 401,
+                "errorCode" => 'incomplete data',
+                'message' => $validator->errors(),
+
+            ], 401);
+        }
+
+        $product = Product::where("lesson_id", $request->lesson_id)->get();
+
+        return response()->json(["data_count" => $product->count(), "data" => $product], 200);
+    }
+
+    public function buy_product(Request $request){
+
+        $user = $request->user();
+
+        $product = Product::find($request->product_id);
+
+        $user_to_product = UserToProducts::where(["product_id" => $product["id"], "user_id" => $user["id"]])->get();
+
+        if($user_to_product->count() > 0){
+            return response()->json([
+                "data" => "محصول خریداری شده است!",
+                "file_path" => $product->file_path,
+            ], 200);
+        }
+
+        $download_able = $product["download_able"];
+
+        if($download_able == 1){
+            $price = $product["price"];
+            $gift_price = $product["gift_price"];
+
+            $current_user = User::find($user["id"]);
+
+            if($user["wallet"] < $price){
+                return response()->json([
+                    "error" => "موجودی کیف پول کافی نمی باشد!",
+                ], 200);
+            }
+            if($user["gift_wallet"] < $gift_price){
+                return response()->json([
+                    "error" => "موجودی کیف پول هدیه کافی نمی باشد!",
+                ], 200);
+            }
+
+            $current_user->wallet -= $price;
+            $current_user->gift_wallet -= $gift_price;
+            $current_user->save();
+            UserToProducts::create([
+                "user_id" => $user["id"],
+                "product_id" => $request->product_id,
+            ]);
+
+            return response()->json([
+                "data" => "عملیات خرید با موفقیت انجام شد!",
+                "file_path" => $product->file_path,
+            ], 200);
+        } else {
+
+        }
+
+    }
+
     /**
      * Display a listing of the resource.
      * @return \Illuminate\Http\Response
@@ -158,6 +243,25 @@ class ProductController extends Controller{
 
         foreach($products as $product){
             $product->image;
+
+            $user_to_product = UserToProducts::where(["product_id" => $product["id"], "user_id" => $user["id"]])->get();
+
+            if($user_to_product->count() > 0)
+                $product["has_paid"] = true;
+            else
+                $product["has_paid"] = false;
+
+            if($product["download_able"] == "0"){
+                $product["download_able"] = false;
+            } else {
+                $product["download_able"] = true;
+            }
+
+            $product["image_url"] = $product["image"]["url"];
+
+            unset($product["image"]);
+            unset($product["file_path"]);
+
         }
 
         return response()->json(["data_count" => $product_to_grades->count(), "data" => $products], 200);

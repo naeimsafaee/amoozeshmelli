@@ -33,4 +33,13 @@ class Section extends Model{
         return gregorian_to_jalali($date[0], $date[1], $date[2], "/");
     }
 
+    public function subject(){
+        return $this->hasOne(Subject::class, 'id', 'subject_id');
+    }
+
+    public function quiz(){
+        return $this->hasOne(Quiz::class, 'id', 'quiz_id');
+    }
+
+
 }

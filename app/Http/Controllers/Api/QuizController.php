@@ -9,6 +9,7 @@ use App\Quiz;
 use App\Rules\persian_date;
 use App\Section;
 use App\User;
+use App\UserToQuizzes;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +17,66 @@ use Validator;
 
 
 class QuizController extends Controller{
+
+    public function quiz_correction(Request $request){
+
+        $question_ids = explode(",", $request->questions);
+        $answers = explode(",", $request->answers);
+
+        $quiz_id = $request->quiz_id;
+
+        $i = 0;
+        $correct = 0;
+        $wrong = 0;
+        foreach($question_ids as $question_id){
+            $question = Question::find($question_id);
+            $question->options;
+
+            $answer = $answers[$i];
+
+            $options = $question["options"];
+            foreach($options as $option){
+                if($option["id"] == $answer){
+
+                    if($option["is_correct"] == 0){
+                        $wrong++;
+                    } else {
+                        $correct++;
+                    }
+                }
+            }
+            $i++;
+        }
+
+        $fomula = (($correct * 3) - $wrong) / (count($question_ids) * 3);
+        $fomula *= 100;
+
+        $user = $request->user();
+
+        $answer_file = null;
+        if($quiz_id != 0){
+            $user = User::find($user["id"]);
+
+            $quiz = Quiz::find($quiz_id);
+            $answer_file = $quiz->answer_file;
+            $quiz_id = $quiz->id;
+
+            $user_to_quizzes = UserToQuizzes::where(["user_id" => $user->id, "quiz_id" => $quiz_id])->get();
+
+            if($user_to_quizzes->count() > 0){
+
+            } else {
+                if($fomula > 0)
+                    $user->gift_wallet = $user->gift_wallet + ceil(($quiz->award * $fomula / 100));
+                UserToQuizzes::create(["user_id" => $user->id, "quiz_id" => $quiz_id]);
+            }
+
+            $user->save();
+
+        }
+
+        return response()->json(["darsad" => round($fomula, 2), "answer_file" => $answer_file], 200);
+    }
 
     public function show_quiz(Request $request){
         $quizzes = Quiz::Paginate(10);
@@ -117,8 +178,11 @@ class QuizController extends Controller{
             return response()->json(["error" => ["message" => "quiz not found!"]], 404);
 
         $questions = Question::where("quiz_id", $id)->get();
+
+        $lesson_id = 0;
         foreach($questions as $question){
             $question->image;
+            $question->lesson;
             $options = $question->options;
 
             foreach($options as $option){
@@ -128,8 +192,19 @@ class QuizController extends Controller{
                 unset($option["image"]);
             }
 
+            if($question["lesson_id"] != $lesson_id){
+                $question["is_new_tab"] = true;
+            } else {
+                $question["is_new_tab"] = false;
+            }
+
+            $question["lesson_name"] = $question["lesson"]["title"];
+
+            $lesson_id = $question["lesson_id"];
             $question["image_url"] = $question["image"]["url"];
+
             unset($question["image"]);
+            unset($question["lesson"]);
             unset($question["image_id"]);
         }
 

@@ -46,17 +46,22 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
     //    Route::post('user_lessons', 'Api\LessonController@user_lessons');
 
     Route::get('u_products', 'Api\ProductController@show_products');
+    Route::post('buy_product', 'Api\ProductController@buy_product');
+//    Route::post('u_products_with_lesson', 'Api\ProductController@show_product_with_lesson_id');
 
     Route::get('sliders', 'Api\ImageController@sliders');
     Route::post('user_search_teacher_with_sub', 'Api\TeacherController@search_teacher_with_sub');
 
     Route::post('user_search_section', 'Api\SectionController@section_with_teacher_and_subject');
 
+    Route::post('buy_section', 'Api\SectionController@buy_section');
+
     Route::post('user_part/{id}' , 'Api\PartController@show_user_part');
 
     Route::post('make_quiz' , 'Api\QuizController@make_quiz');
     Route::post('complete_quiz' , 'Api\QuizController@get_complete_quiz');
     Route::post('show_questions_of_quiz/{id}' , 'Api\QuizController@show_questions_of_quiz');
+    Route::post('quiz_correction' , 'Api\QuizController@quiz_correction');
 
 });
 

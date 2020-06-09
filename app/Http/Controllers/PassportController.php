@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Validator;
 
 class PassportController extends Controller{
 
     public function register(Request $request){
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|iran_mobile|unique:users,phone',
+            'phone' => 'required|iran_mobile',
             'grade_id' => 'required|exists:grades,id',
             'city_id' => 'required|exists:cities,id',
         ], [
@@ -33,16 +34,41 @@ class PassportController extends Controller{
             ], 401);
         }
 
-        $code = rand(1000, 9999);
+        /*$response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post('https://RestfulSms.com/api/Token', [
+            'UserApiKey' => 'e59159046396bd4bc7fd6545',
+            'SecretKey' => 'Ali77570328',
+        ]);
+
+        $response = $response->json();
+        if(array_key_exists("IsSuccessful", $response)){
+            if($response["IsSuccessful"]){
+                $token = $response["TokenKey"];
+
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                    'x-sms-ir-secure-token' => $token,
+                ])->post('https://RestfulSms.com/api/MessageSend', [
+                    'Messages' => ['کد ورود شما به اموزش ملی : ' . $code],
+                    'MobileNumbers' => ["$request->phone"],
+                    "LineNumber" => "10005948",
+                    "SendDateTime" => "",
+                    "CanContinueInCaseOfError" => "false",
+                ]);
+            }
+        }*/
 
         User::updateOrcreate([
             "phone" => $request->phone,
+        ], [
             "grade_id" => $request->grade_id,
             "city_id" => $request->city_id,
-            "code" => $code,
+//            "code" => $code,
         ]);
 
-        return response()->json(["success" => ["message" => "sms code has been sent!", "code" => $code]], 200);
+
+        return response()->json(["success" => ["message" => "sms code has been sent!"]], 200);
     }
 
     public function verify_sms(Request $request){
@@ -106,19 +132,47 @@ class PassportController extends Controller{
 
         $code = rand(1000, 9999);
 
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post('https://RestfulSms.com/api/Token', [
+            'UserApiKey' => 'e59159046396bd4bc7fd6545',
+            'SecretKey' => 'Ali77570328',
+        ]);
+
+        $response = $response->json();
+        if(array_key_exists("IsSuccessful", $response)){
+            if($response["IsSuccessful"]){
+                $token = $response["TokenKey"];
+
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                    'x-sms-ir-secure-token' => $token,
+                ])->post('https://RestfulSms.com/api/MessageSend', [
+                    'Messages' => ['کد ورود شما به اموزش ملی : ' . $code],
+                    'MobileNumbers' => ["$request->phone"],
+                    "LineNumber" => "10005948",
+                    "SendDateTime" => "",
+                    "CanContinueInCaseOfError" => "false",
+                ]);
+            }
+        }
+
         $user = User::where("phone", $request->phone);
         if($user->count() == 0){
             $user = User::updateOrcreate([
                 "phone" => $request->phone,
                 "code" => $code,
             ]);
-            return response()->json(["code" => $code , "is_register" => 1], 200);
+            return response()->json(["is_register" => 1], 200);
         } else {
             $user = $user->first();
 
             $user->code = $code;
             $user->save();
-            return response()->json(["code" => $code , "is_register" => 0], 200);
+
+            if($user->grade_id == null)
+                return response()->json(["is_register" => 1], 200);
+            return response()->json(["is_register" => 0], 200);
         }
 
     }

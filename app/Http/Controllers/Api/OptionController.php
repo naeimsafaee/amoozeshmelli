@@ -139,8 +139,9 @@ class OptionController extends Controller{
         $validator = Validator::make($request->all(), [
             'title' => 'string',
             'image' => 'image',
+            'need_delete_image' => 'integer',
             'question_id' => 'integer|exists:questions,id',
-            'is_correct' => 'require|integer',
+            'is_correct' => 'required|integer',
         ], [
             "title.required" => "title is required!",
             "image.image" => "image is not an image!",
@@ -174,21 +175,25 @@ class OptionController extends Controller{
             }
         }
 
-        if($request->has("image")){
-            $file = $request->file('image');
-            $image_id = null;
-            if($file != null){
-                $ext = $file->extension();
-                $file_name = time() . mt_rand() . "." . $ext;
+        if($request->has("need_delete_image")){
+            $option->image_id = null;
+        } else {
+            if($request->has("image")){
+                $file = $request->file('image');
+                $image_id = null;
+                if($file != null){
+                    $ext = $file->extension();
+                    $file_name = time() . mt_rand() . "." . $ext;
 
-                Storage::disk('ftp')->put("options/images/" . $file_name, fopen($file, 'r+'));
+                    Storage::disk('ftp')->put("options/images/" . $file_name, fopen($file, 'r+'));
 
-                $image_id = Image::create([
-                    "name" => $file_name,
-                    "path" => "http://easyno.ir/options/images",
-                ])->id;
+                    $image_id = Image::create([
+                        "name" => $file_name,
+                        "path" => "http://easyno.ir/options/images",
+                    ])->id;
+                }
+                $option->image_id = $image_id;
             }
-            $option->image_id = $image_id;
         }
 
         if($request->has("title"))

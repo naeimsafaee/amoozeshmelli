@@ -23,5 +23,7 @@ class Quiz extends Model
         return gregorian_to_jalali($date[0], $date[1], $date[2], "/");
     }
 
-
+    public function questions(){
+        return $this->hasMany(Question::class, 'quiz_id', 'id');
+    }
 }
