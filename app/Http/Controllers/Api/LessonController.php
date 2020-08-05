@@ -57,10 +57,22 @@ class LessonController extends Controller{
             $lessons[$i]["id"] = $grade_to_lesson["lessons"]["id"];
             $lessons[$i]["title"] = $grade_to_lesson["lessons"]["title"];
             $lessons[$i]["url"] = $grade_to_lesson["lessons"]["image"]["url"];
+            $lessons[$i]["created_at"] = $grade_to_lesson["lessons"]["created_at"];
             $i++;
         }
 
-        return response()->json(["data_count" => count($lessons), "data" => $lessons], 200);
+        $lessons = collect($lessons)->sortBy('created_at');
+/*
+        if($request->has("is_naeim")){
+            return response()->json($lessons, 200);
+        }*/
+
+        $main_lessons = [];
+        foreach($lessons as $lesson){
+            $main_lessons[] = $lesson;
+        }
+
+        return response()->json(["data_count" => count($lessons), "data" => $main_lessons], 200);
     }
 
     public function subjects_of_lesson(Request $request){
@@ -82,7 +94,7 @@ class LessonController extends Controller{
             ], 401);
         }
 
-        $subjects = Subject::where("lesson_id", $request->lesson_id)->get();
+        $subjects = Subject::where("lesson_id", $request->lesson_id)->orderby("created_at", "ASC")->get();
 
         return response()->json(["data_count" => $subjects->count(), "data" => $subjects], 200);
     }
@@ -104,7 +116,7 @@ class LessonController extends Controller{
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
             'lesson_title' => 'required|string',
-//            'grade_id' => 'required|integer|exists:grades,id',/*change this to array*/
+            //            'grade_id' => 'required|integer|exists:grades,id',/*change this to array*/
             'grade_ids' => 'required|array',
             'grade_ids.*' => 'exists:grades,id',
         ], [
@@ -150,8 +162,8 @@ class LessonController extends Controller{
         $lesson = Lesson::find($id);
 
         if($lesson == null)
-            return response()->json(["error" => ["message" => "lesson not found!"]],404);
-        return response()->json(["data" => $lesson],200);
+            return response()->json(["error" => ["message" => "lesson not found!"]], 404);
+        return response()->json(["data" => $lesson], 200);
     }
 
     /**

@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Advertise;
 use App\Http\Controllers\Controller;
+use App\User;
+use App\UserToAdvertis;
 use App\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Validator;
+use Carbon\Carbon;
 
 class AdvertiseController extends Controller{
     /**
@@ -18,7 +21,7 @@ class AdvertiseController extends Controller{
 
         $addvertise = Advertise::all();
 
-        foreach($addvertise as $item) {
+        foreach($addvertise as $item){
             $item->video;
             unset($item["video_id"]);
 
@@ -168,5 +171,66 @@ class AdvertiseController extends Controller{
             return response()->json(["error" => ["message" => "advertise not found!"]], 404);
         $advertise->delete();
         return response()->json(["success" => ["message" => "advertise deleted successfully!"]], 200);
+    }
+
+    public function get_random_advertise(Request $request){
+
+        $ids = Advertise::select("id" , "count")->where("id", ">", 0)->get();
+        $user = $request->user();
+
+        if($ids->count() == 0){
+            return response()->json(["data_count" => 0, "data" => null], 200);
+        }
+
+        $MainIds = [];
+
+        foreach($ids as $id){
+            $user_to_advertise = UserToAdvertis::where(["advertise_id" => $id["id"], "user_id" => $user["id"]])->whereDate('created_at', Carbon::today())->get();
+            if($user_to_advertise->count() >= $id["count"] ){
+            } else {
+                $MainIds[] = $id;
+            }
+        }
+
+        $random = rand(0, count($MainIds) - 1);
+        if (count($MainIds)==0)
+            return response()->json(["data_count" => 0, "data" => null], 200);
+
+        $advertise = Advertise::find($MainIds[$random]["id"]);
+        $advertise->video;
+
+        $advertise["video_url"] = $advertise["video"]["url"];
+
+        $random_id=$MainIds[$random]["id"];
+        $add=new UserToAdvertis();
+        $add->user_id=$user["id"];
+        $add->advertise_id=$random_id;
+        $add->save();
+        unset($advertise["video_id"]);
+        unset($advertise["video"]);
+
+
+        return response()->json(["data_count" => 1, "data" => $advertise], 200);
+    }
+
+    public function end_advertise(Request $request, $id){
+
+        $user = $request->user();
+
+        $advertise = Advertise::find($id);
+
+//        $advertise->count = $advertise->count - 1;
+//        $advertise->save();
+
+        UserToAdvertis::create([
+            "user_id" => $user["id"],
+            "advertise_id" => $id,
+        ]);
+
+        $user = User::find($user["id"]);
+        $user->gift_wallet = $user->gift_wallet + $advertise["gift"];
+        $user->save();
+
+        return response()->json(["success" => "successfully"], 200);
     }
 }

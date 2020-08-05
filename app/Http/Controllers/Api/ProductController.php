@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Finance;
 use App\Http\Controllers\Controller;
 use App\Image;
+use App\PeopleToPercent;
 use App\Product;
 use App\ProductToGrade;
 use App\Section;
@@ -68,29 +70,84 @@ class ProductController extends Controller{
 
             $current_user = User::find($user["id"]);
 
+            $main_price = 0;
+
             if($user["wallet"] < $price){
                 return response()->json([
                     "error" => "موجودی کیف پول کافی نمی باشد!",
                 ], 200);
             }
+
             if($user["gift_wallet"] < $gift_price){
-                return response()->json([
-                    "error" => "موجودی کیف پول هدیه کافی نمی باشد!",
-                ], 200);
+
+                //if not have any gift credit
+                if($user["gift_wallet"] < 1){
+
+                    if($user["wallet"] < $price + $gift_price){
+                        return response()->json([
+                            "error" => "موجودی کیف پول کافی نمی باشد!",
+                        ], 200);
+                    } else {
+                        $current_user->wallet -= ($price + $gift_price);
+                        $main_price = $price + $gift_price;
+                    }
+                } //if have gift credit but not enough
+                else {
+                    $remain = $gift_price - $user["gift_wallet"];
+                    if($user["wallet"] < $price + $remain){
+                        return response()->json([
+                            "error" => "موجودی کیف پول کافی نمی باشد!",
+                        ], 200);
+                    } else {
+                        $current_user->wallet -= ($price + $remain);
+                        $current_user->gift_wallet -= $current_user->gift_wallet;
+                        $main_price = $price + $gift_price;
+                    }
+                }
+                $current_user->save();
+
+                UserToProducts::create([
+                    "user_id" => $user["id"],
+                    "product_id" => $request->product_id,
+                ]);
+                //                return response()->json([
+                //                    "data" => "عملیات خرید با موفقیت انجام شد!",
+                //                    "file_path" => $product->file_path,
+                //                ], 200);
+            } else {
+
+                $main_price = $price;
+                $current_user->wallet -= $price;
+                $current_user->gift_wallet -= $gift_price;
+                $current_user->save();
+                UserToProducts::create([
+                    "user_id" => $user["id"],
+                    "product_id" => $request->product_id,
+                ]);
+
             }
 
-            $current_user->wallet -= $price;
-            $current_user->gift_wallet -= $gift_price;
-            $current_user->save();
-            UserToProducts::create([
-                "user_id" => $user["id"],
-                "product_id" => $request->product_id,
-            ]);
+            if($main_price != 0){
+                $peoples = PeopleToPercent::query()->where("product_id", $request->product_id)->get();
+
+                foreach($peoples as $people){
+
+                    $main_price = $main_price * $people["percent"] / 100;
+
+                    Finance::query()->create([
+                        "people_id" => $people["people_id"],
+                        "city_id" => $current_user->city_id,
+                        "price" => $main_price,
+                        "info" => "خرید محصول " . $product["title"],
+                    ]);
+                }
+            }
 
             return response()->json([
                 "data" => "عملیات خرید با موفقیت انجام شد!",
                 "file_path" => $product->file_path,
             ], 200);
+
         } else {
 
         }
@@ -247,8 +304,7 @@ class ProductController extends Controller{
             $user_to_product = UserToProducts::where(["product_id" => $product["id"], "user_id" => $user["id"]])->get();
 
             if($user_to_product->count() > 0)
-                $product["has_paid"] = true;
-            else
+                $product["has_paid"] = true; else
                 $product["has_paid"] = false;
 
             if($product["download_able"] == "0"){

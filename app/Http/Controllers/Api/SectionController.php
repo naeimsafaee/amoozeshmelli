@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Finance;
 use App\Http\Controllers\Controller;
+use App\PeopleToPercent;
+use App\Question;
+use App\Quiz;
 use App\Rules\persian_date;
 use App\Section;
 use App\User;
+use App\UserToEndSection;
+use App\UserToQuizzes;
 use App\UserToSections;
 use DateTime;
 use Illuminate\Http\Request;
@@ -37,7 +43,7 @@ class SectionController extends Controller{
         $sections = Section::where([
             "teacher_id" => $request->teacher_id,
             "subject_id" => $request->subject_id,
-        ])->select("id", "title", "price", "gift_price", "early_price", "quiz_id", "award", "helper_award", "pre_section_id", "opening_date", "can_pass")->get();
+        ])->orderby("created_at", "ASC")->select("id", "title", "price", "gift_price", "early_price", "quiz_id", "award", "helper_award", "pre_section_id", "opening_date", "can_pass")->get();
 
         $now = new DateTime();
         $now = strtotime($now->format('Y-m-d'));
@@ -49,14 +55,12 @@ class SectionController extends Controller{
             $expire_time = strtotime($section["opening_date"]);
 
             if($expire_time <= $now)
-                $section["is_locked"] = false;
-            else
+                $section["is_locked"] = false; else
                 $section["is_locked"] = true;
 
             $user_to_section = UserToSections::where(["section_id" => $section["id"], "user_id" => $user["id"]])->get();
             if($user_to_section->count() == 0)
-                $section["has_paid"] = false;
-            else
+                $section["has_paid"] = false; else
                 $section["has_paid"] = true;
 
         }
@@ -75,11 +79,9 @@ class SectionController extends Controller{
 
         $expire_time = strtotime($section["opening_date"]);
 
-        if($expire_time < $now)
-            $status = 0;
-        else
+        if($expire_time <= $now)
+            $status = 0; else
             $status = 1;
-
 
         $price = $section["price"];
         $gift_price = $section["gift_price"];
@@ -95,14 +97,49 @@ class SectionController extends Controller{
                     "error" => "موجودی کیف پول کافی نمی باشد!",
                 ], 200);
             }
-            if($user["gift_wallet"] < $gift_price){
-                return response()->json([
-                    "error" => "موجودی کیف پول هدیه کافی نمی باشد!",
-                ], 200);
-            }
 
-            $current_user->wallet -= $price;
-            $current_user->gift_wallet -= $gift_price;
+            if($user["gift_wallet"] < $gift_price){
+
+
+                //if not have any gift credit
+                if($user["gift_wallet"] < 1){
+
+                    if($user["wallet"] < $price + $gift_price){
+                        return response()->json([
+                            "error" => "موجودی کیف پول کافی نمی باشد!",
+                        ], 200);
+                    } else {
+                        $main_price = ($price + $gift_price);
+                        $current_user->wallet -= ($price + $gift_price);
+                    }
+                } //if have gift credit but not enough
+                else {
+                    $remain = $gift_price - $user["gift_wallet"];
+                    if($user["wallet"] < $price + $remain){
+                        return response()->json([
+                            "error" => "موجودی کیف پول کافی نمی باشد!",
+                        ], 200);
+                    } else {
+                        $main_price = ($price + $remain);
+                        $current_user->wallet -= ($price + $remain);
+                        $current_user->gift_wallet -= $current_user->gift_wallet;
+                    }
+                }
+                $current_user->save();
+
+
+                /*UserToSections::create([
+                    "user_id" => $user["id"],
+                    "section_id" => $request->section_id,
+                ]);*/
+//                return response()->json(["data" => "عملیات خرید با موفقیت انجام شد!"], 200);
+            } else {
+
+                $current_user->wallet -= $price;
+                $main_price = $price;
+                $current_user->gift_wallet -= $gift_price;
+
+            }
 
         } elseif($status == 1) {
             if($user["wallet"] < $early_price){
@@ -110,7 +147,25 @@ class SectionController extends Controller{
                     "error" => "موجودی کیف پول کافی نمی باشد!",
                 ], 200);
             }
+            $main_price = $early_price;
             $current_user->wallet -= $early_price;
+        }
+
+        if($main_price != 0){
+            $peoples = PeopleToPercent::query()
+                ->where("quiz_id", $request->section_id)->get();
+
+            foreach($peoples as $people){
+
+                $main_price = $main_price * $people["percent"] / 100;
+
+                Finance::query()->create([
+                    "people_id" => $people["people_id"],
+                    "city_id" => $current_user->city_id,
+                    "price" => $main_price,
+                    "info" => "خرید بخش " . $section["title"],
+                ]);
+            }
         }
 
         $current_user->save();
@@ -120,6 +175,102 @@ class SectionController extends Controller{
             "section_id" => $request->section_id,
         ]);
         return response()->json(["data" => "عملیات خرید با موفقیت انجام شد!"], 200);
+    }
+
+    public function end_section(Request $request){
+
+        $section_id = $request->section_id;
+        $user = $request->user();
+
+
+        if($request->has("darsad")){
+            $fomula = $request->darsad;
+        } else {
+
+            if($request->questions == 0){
+
+                $user_to_end_section = UserToEndSection::where([
+                    "user_id" => $user->id,
+                    "section_id" => $section_id,
+                ])->get();
+
+                if($user_to_end_section->count() > 0){
+
+                } else {
+                    $user = User::find($user["id"]);
+
+                    $section = Section::find($section_id);
+
+                    $award = $section->award;
+                    $helper_award = $section->helper_award;
+
+                    $user->gift_wallet = $user->gift_wallet + $award + $helper_award;
+                    $user->save();
+
+                    UserToEndSection::create([
+                        "user_id" => $user->id,
+                        "section_id" => $section_id,
+                    ]);
+                }
+
+                return response()->json(["darsad" => 100], 200);
+            }
+
+            $question_ids = explode(",", $request->questions);
+            $answers = explode(",", $request->answers);
+            $i = 0;
+            $correct = 0;
+            $wrong = 0;
+            foreach($question_ids as $question_id){
+                $question = Question::find($question_id);
+                $question->options;
+
+                $answer = $answers[$i];
+
+                $options = $question["options"];
+                foreach($options as $option){
+                    if($option["id"] == $answer){
+                        if($option["is_correct"] == 0){
+                            $wrong++;
+                        } else {
+                            $correct++;
+                        }
+                    }
+                }
+                $i++;
+            }
+
+            $fomula = (($correct * 3) - $wrong) / (count($question_ids) * 3);
+            $fomula *= 100;
+        }
+
+        $user_to_end_section = UserToEndSection::where([
+            "user_id" => $user->id,
+            "section_id" => $section_id,
+        ])->get();
+
+        if($user_to_end_section->count() > 0){
+
+        } else {
+            $user = User::find($user["id"]);
+
+            $section = Section::find($section_id);
+
+            $award = $section->award;
+            $helper_award = $section->helper_award;
+
+            $user->gift_wallet = $user->gift_wallet + $award;
+            if($fomula > 0)
+                $user->gift_wallet = $user->gift_wallet + ceil(($helper_award * $fomula / 100));
+            $user->save();
+
+            UserToEndSection::create([
+                "user_id" => $user->id,
+                "section_id" => $section_id,
+            ]);
+        }
+
+        return response()->json(["darsad" => round($fomula, 2)], 200);
     }
 
     /**

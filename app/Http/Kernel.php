@@ -24,6 +24,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\Cors::class
+
     ];
 
     /**
@@ -69,5 +71,7 @@ class Kernel extends HttpKernel
         'admin_scope' => AdminScopes::class,
         'user_scope' => UserScopes::class,
         'check_user_lesson' => CheckUserLessons::class,
+                'cors' => \App\Http\Middleware\Cors::class,
+
     ];
 }

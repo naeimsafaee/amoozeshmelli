@@ -10,6 +10,8 @@ class Question extends Model{
 
     protected $hidden = ['created_at', 'updated_at',"quiz_id"  , "subject_id"];
 
+    protected $appends = ["answer_file_url"];
+
     public function quiz(){
         return $this->hasOne(Quiz::class, 'id', 'quiz_id');
     }
@@ -28,6 +30,12 @@ class Question extends Model{
 
     public function options(){
         return $this->hasMany(Options::class, 'question_id', 'id');
+    }
+
+    public function getAnswerFileUrlAttribute(){
+        if($this->answer_file == null)
+            return "null";
+        return $this->answer_file;
     }
 
 }

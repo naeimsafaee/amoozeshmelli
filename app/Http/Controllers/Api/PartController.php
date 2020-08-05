@@ -8,7 +8,10 @@ use App\Options;
 use App\Part;
 use App\Rules\persian_date;
 use App\Section;
+use App\UserToQuizzesBoughts;
+use App\UserToSections;
 use App\Video;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Validator;
@@ -119,14 +122,17 @@ class PartController extends Controller{
         return response()->json(["data_count" => $parts->count(), "data" => $parts], 200);
     }
 
-    public function show_user_part($id){
+    public function show_user_part(Request $request , $id){
 
         $parts = Part::where("section_id", $id)->orderby("order", "ASC")->get();
+
+        $user = $request->user();
 
         $i = 0;
         foreach($parts as $part){
             $part->question;
             $part->video;
+
             if($part["question"] != null){
                 $question = $part["question"];
                 $question->image;
@@ -176,30 +182,59 @@ class PartController extends Controller{
 
         $section = Section::find($id);
         $section->subject->lesson;
-        $section->quiz->questions;
+        $section->quiz;
 
-        $questions = $section["quiz"]["questions"];
-        $section["quiz"]["is_locked"] = false;
+        $quiz = $section["quiz"];
 
+        $now = new DateTime();
+        $now = strtotime($now->format('Y-m-d'));
 
+        if($section["quiz"]["questions"] != null){
+            $quiz->questions;
+            $questions = $section["quiz"]["questions"];
 
-        foreach($questions as $question){
-            $question->image;
-            $question->options;
+            $expire_time = strtotime($section["quiz"]["quiz_date"]);
 
-            $question["image_url"] = $question["image"]["url"];
+            if($expire_time <= $now)
+                $section["quiz"]["is_locked"] = false;
+            else
+                $section["quiz"]["is_locked"] = true;
 
-            $options = $question["options"];
-            foreach($options as $option){
-                $option->image;
-                $option["image_url"] = $option["image"]["url"];
+            $ser_to_quizzes = UserToQuizzesBoughts::where(["quiz_id" => $section["quiz"]["id"], "user_id" => $user["id"]])->get();
+            if($ser_to_quizzes->count() == 0)
+                $section["quiz"]["has_paid"] = false;
+            else
+                $section["quiz"]["has_paid"] = true;
 
-                unset($option["image_id"]);
-                unset($option["image"]);
+            foreach($questions as $question){
+                $question->image;
+                $question->options;
+
+                $question["image_url"] = $question["image"]["url"];
+
+                $options = $question["options"];
+                foreach($options as $option){
+                    $option->image;
+                    $option["image_url"] = $option["image"]["url"];
+
+                    unset($option["image_id"]);
+                    unset($option["image"]);
+                }
+                unset($question["image_id"]);
+                unset($question["image"]);
             }
-            unset($question["image_id"]);
-            unset($question["image"]);
+
         }
+
+        if($section["quiz"] == null)
+            $section["quiz"] = [];
+
+        $user = $request->user();
+        $user_to_section = UserToSections::where(["section_id" => $section["id"], "user_id" => $user["id"]])->get();
+        if($user_to_section->count() == 0)
+            $section["has_paid"] = false;
+        else
+            $section["has_paid"] = true;
 
         return response()->json([
             "data_count" => $parts->count(),
@@ -208,7 +243,8 @@ class PartController extends Controller{
             "subject_name" => $section["subject"]["title"],
             "lesson_name" => $section["subject"]["lesson"]["title"],
             "lesson_id" => $section["subject"]["lesson"]["id"],
-            "quiz" => $section["quiz"]
+            "quiz" => $section["quiz"],
+            "has_paid" => $section["has_paid"]
         ], 200);
     }
 

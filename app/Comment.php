@@ -13,8 +13,13 @@ class Comment extends Model{
     public function user(){
         return $this->hasOne(User::class, 'id', 'user_id');
     }
+
     public function reply_to(){
         return $this->hasOne(Comment::class, 'id', 'comment_id');
+    }
+
+    public function section(){
+        return $this->hasOne(Section::class, 'id', 'section_id');
     }
 
 

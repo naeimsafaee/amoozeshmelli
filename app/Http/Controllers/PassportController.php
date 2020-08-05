@@ -64,7 +64,7 @@ class PassportController extends Controller{
         ], [
             "grade_id" => $request->grade_id,
             "city_id" => $request->city_id,
-//            "code" => $code,
+            //            "code" => $code,
         ]);
 
 
@@ -144,16 +144,21 @@ class PassportController extends Controller{
             if($response["IsSuccessful"]){
                 $token = $response["TokenKey"];
 
+                $data = array(
+                    "ParameterArray" => array(
+                        array(
+                            "Parameter" => "VerificationCode",
+                            "ParameterValue" => "$code"
+                        )
+                    ),
+                    "Mobile" => "$request->phone",
+                    "TemplateId" => "27554"
+                );
+
                 $response = Http::withHeaders([
                     'Content-Type' => 'application/json',
                     'x-sms-ir-secure-token' => $token,
-                ])->post('https://RestfulSms.com/api/MessageSend', [
-                    'Messages' => ['کد ورود شما به اموزش ملی : ' . $code],
-                    'MobileNumbers' => ["$request->phone"],
-                    "LineNumber" => "10005948",
-                    "SendDateTime" => "",
-                    "CanContinueInCaseOfError" => "false",
-                ]);
+                ])->post('https://RestfulSms.com/api/UltraFastSend', $data);
             }
         }
 
@@ -172,7 +177,7 @@ class PassportController extends Controller{
 
             if($user->grade_id == null)
                 return response()->json(["is_register" => 1], 200);
-            return response()->json(["is_register" => 0], 200);
+            return response()->json(["is_register" => 0 ], 200);
         }
 
     }

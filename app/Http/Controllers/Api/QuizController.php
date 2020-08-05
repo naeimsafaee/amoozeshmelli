@@ -2,21 +2,101 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Finance;
 use App\Http\Controllers\Controller;
 use App\Lesson;
+use App\PeopleToPercent;
 use App\Question;
 use App\Quiz;
 use App\Rules\persian_date;
 use App\Section;
 use App\User;
 use App\UserToQuizzes;
+use App\UserToQuizzesBoughts;
+use App\UserToSections;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Validator;
 
 
 class QuizController extends Controller{
+
+    public function buy_quiz(Request $request){
+
+        $user = $request->user();
+
+        $quiz = Quiz::find($request->quiz_id);
+
+        $now = new DateTime();
+        $now = strtotime($now->format('Y-m-d'));
+
+        $expire_time = strtotime($quiz["opening_date"]);
+
+        if($expire_time <= $now)
+            $status = 0;
+        else
+            $status = 1;
+
+        $price = $quiz["price"];
+        $gift_price = $quiz["gift_price"];
+
+        $early_price = $quiz["early_price"];
+
+        $current_user = User::find($user["id"]);
+
+        if($status == 0){
+
+            if($user["wallet"] < $price){
+                return response()->json([
+                    "error" => "موجودی کیف پول کافی نمی باشد!",
+                ], 200);
+            }
+            if($user["gift_wallet"] < $gift_price){
+                return response()->json([
+                    "error" => "موجودی کیف پول هدیه کافی نمی باشد!",
+                ], 200);
+            }
+
+            $current_user->wallet -= $price;
+            $current_user->gift_wallet -= $gift_price;
+
+        } elseif($status == 1) {
+            if($user["wallet"] < $early_price){
+                return response()->json([
+                    "error" => "موجودی کیف پول کافی نمی باشد!",
+                ], 200);
+            }
+            $current_user->wallet -= $early_price;
+        }
+
+        $main_price = $current_user->wallet;
+        if($main_price != 0){
+            $peoples = PeopleToPercent::query()
+                ->where("quiz_id", $request->quiz_id)->get();
+
+            foreach($peoples as $people){
+
+                $main_price = $main_price * $people["percent"] / 100;
+
+                Finance::query()->create([
+                    "people_id" => $people["people_id"],
+                    "city_id" => $current_user->city_id,
+                    "price" => $main_price,
+                    "info" => "خرید آزمون " . $quiz["title"],
+                ]);
+            }
+        }
+
+        $current_user->save();
+
+        UserToQuizzesBoughts::create([
+            "user_id" => $user["id"],
+            "quiz_id" => $request->quiz_id,
+        ]);
+        return response()->json(["data" => "عملیات خرید با موفقیت انجام شد!"], 200);
+    }
 
     public function quiz_correction(Request $request){
 
@@ -53,7 +133,7 @@ class QuizController extends Controller{
 
         $user = $request->user();
 
-        $answer_file = null;
+        $answer_file = "null";
         if($quiz_id != 0){
             $user = User::find($user["id"]);
 
@@ -123,7 +203,11 @@ class QuizController extends Controller{
             $question = Question::where(["lesson_id" => $request->lesson_id]);
         }
 
-        $question = $question->take($request->how_many)->get();
+        $question = $question->inRandomOrder()->limit($request->how_many)->get();
+
+        /*if(Auth::user()->id == 1){
+            $question[] = Question::find(3229);
+        }  */
 
         foreach($question as $q){
             $q->image;
@@ -144,7 +228,7 @@ class QuizController extends Controller{
         return response()->json(["data_count" => $question->count(), "data" => $question], 200);
     }
 
-    public function get_complete_quiz(){
+    public function get_complete_quiz(Request $request){
 
         $sections = Section::where("quiz_id", "<>", "")->get();
 
@@ -159,19 +243,40 @@ class QuizController extends Controller{
         $now = new DateTime();
         $now = strtotime($now->format('Y-m-d'));
 
+        $MainQuiz = [];
         foreach($quizzes as $quiz){
 
             $expire_time = strtotime($quiz["quiz_date"]);
 
+            $questions = Question::where("quiz_id" , $quiz["id"])->get();
+            if($questions->count() == 0){
+                continue;
+            }
+            if($quiz["quiz_time"] == "0"){
+                continue;
+            }
+
             if($expire_time < $now)
-                $quiz["is_locked"] = false; else
+                $quiz["is_locked"] = false;
+            else
                 $quiz["is_locked"] = true;
+
+            $user = $request->user();
+
+            $user_to_quizzes_boughts = UserToQuizzesBoughts::where(["user_id" => $user["id"] , "quiz_id" => $quiz["id"]])->get();
+            $has_paid = false;
+            if($user_to_quizzes_boughts->count() > 0)
+                $has_paid = true;
+
+            $quiz["has_paid"] = $has_paid;
+
+            $MainQuiz[] = $quiz;
         }
 
-        return response()->json(["data_count" => $quizzes->count(), "data" => $quizzes], 200);
+        return response()->json(["data_count" => count($MainQuiz), "data" => $MainQuiz], 200);
     }
 
-    public function show_questions_of_quiz($id){
+    public function show_questions_of_quiz(Request $request , $id){
 
         $quiz = Quiz::find($id);
         if($quiz == null)
@@ -208,7 +313,14 @@ class QuizController extends Controller{
             unset($question["image_id"]);
         }
 
-        return response()->json(["data_count" => $questions->count(), "data" => $questions], 200);
+        $user = $request->user();
+
+        $user_to_quizzes_boughts = UserToQuizzesBoughts::where(["user_id" => $user["id"] , "quiz_id" => $id])->get();
+        $has_paid = false;
+        if($user_to_quizzes_boughts->count() > 0)
+            $has_paid = true;
+
+        return response()->json(["has_paid" => $has_paid , "quiz" => $quiz , "data_count" => $questions->count(), "data" => $questions], 200);
     }
 
     /**

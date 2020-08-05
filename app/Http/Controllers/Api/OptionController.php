@@ -137,7 +137,7 @@ class OptionController extends Controller{
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'title' => 'string',
+            'title' => 'string|nullable',
             'image' => 'image',
             'need_delete_image' => 'integer',
             'question_id' => 'integer|exists:questions,id',

@@ -55,6 +55,7 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
     Route::post('user_search_section', 'Api\SectionController@section_with_teacher_and_subject');
 
     Route::post('buy_section', 'Api\SectionController@buy_section');
+    Route::post('end_section', 'Api\SectionController@end_section');
 
     Route::post('user_part/{id}' , 'Api\PartController@show_user_part');
 
@@ -62,6 +63,16 @@ Route::middleware(['auth:api', 'user_scope:user'])->group(function(){
     Route::post('complete_quiz' , 'Api\QuizController@get_complete_quiz');
     Route::post('show_questions_of_quiz/{id}' , 'Api\QuizController@show_questions_of_quiz');
     Route::post('quiz_correction' , 'Api\QuizController@quiz_correction');
+    Route::post('buy_quiz' , 'Api\QuizController@buy_quiz');
+
+
+    Route::apiResource('comment' , 'Api\CommentController');
+    Route::apiResource('profile' , 'Api\ProfileController');
+
+    Route::post('get_random_advertise' , 'Api\AdvertiseController@get_random_advertise');
+    Route::post('end_advertise/{id}' , 'Api\AdvertiseController@end_advertise');
+
+    Route::post('increase_wallet' , 'Api\ProfileController@increase_wallet');
 
 });
 
